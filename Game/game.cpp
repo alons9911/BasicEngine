@@ -1,6 +1,9 @@
 #include "game.h"
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
+#include <vector>
+using namespace std;
+
 
 static void printMat(const glm::mat4 mat)
 {
@@ -27,7 +30,7 @@ void Game::Init()
 	AddShader("../res/shaders/pickingShader");	
 	AddShader("../res/shaders/basicShader");
 	
-	AddTexture("../res/textures/box0.bmp",false);
+	AddTexture("../res/textures/lena256.jpg",false);
 
 	AddShape(Plane,-1,TRIANGLES);
 	

@@ -5,11 +5,27 @@
 #include "stb_image.h"
 #include "../res/includes/glad/include/glad/glad.h"
 #include <iostream>
+#include <vector>
+#include "../Game/assignment1.cpp"
+using namespace std;
 
 Texture::Texture(const std::string& fileName)
 {
 	int width, height, numComponents;
     unsigned char* data = stbi_load((fileName).c_str(), &width, &height, &numComponents, 4);
+
+    // new code
+	std::cout<<width<<" "<<height<<" "<<numComponents;
+	std::cout<<std::endl;
+	vector<vector<unsigned char>> *matrix = imageToGray(data, height, width);
+	vector<vector<unsigned char>> *floyed_steinberged = floyedSteinberg(matrix);
+    //unsigned char* newArray = matrixToArray(floyed_steinberged, &width, &height);
+    //unsigned char* newArray = matrixToArray(matrix, &width, &height);
+    unsigned char* newArray = grayImageToOriginalRgbaTemplate(floyed_steinberged, data, width, height);
+    cout << compareArrays(data, newArray, width * height);
+
+    data = newArray;
+    // new code
 	
     if(data == NULL)
 		std::cerr << "Unable to load texture: " << fileName << std::endl;

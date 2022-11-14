@@ -2,6 +2,43 @@
 // #include "../DisplayGLFW/display.h"
 #include "game.h"
 #include "../res/includes/glm/glm.hpp"
+#include "../Engine3D/stb_image.h"
+#include <iostream>
+#include <fstream>
+#include <vector>
+using namespace std;
+
+
+static void printMatToFile(const unsigned char* arr, const int height, const int width)
+{
+	ofstream myfile ("lena.txt");
+	if (myfile.is_open())
+	{
+		for (int i = 0; i < height; i++)
+		{
+			for (int j = 0; j < width; j++)
+			{
+				myfile<<static_cast<unsigned>(arr[i * width + j])<<", ";
+			}
+			myfile<<"\n";
+		}
+		myfile.close();
+	}
+  	else cout << "Unable to open file";
+	
+}
+
+static void printVectorMat(std::vector<std::vector<unsigned char>> mat)
+{
+	for (int i = 0; i < mat.size(); i++)
+	{
+		for (int j = 0; j < mat[i].size(); j++)
+		{
+			cout << int(mat[i][j]) << ",";
+		}
+		cout << endl;
+	}
+}
 
 int main(int argc,char *argv[])
 {
