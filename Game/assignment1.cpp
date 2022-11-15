@@ -195,3 +195,103 @@ vector<vector<unsigned char>> *halftone(vector<vector<unsigned char>> *pixels)
     }
     return newPixels;
 }
+
+vector<vector<int>> *getGaussianKernel(float *div)
+{
+    vector<vector<int>> *kernel = new vector<vector<int>>();
+    kernel->push_back(vector<int>{1, 2, 1});
+    kernel->push_back(vector<int>{2, 4, 2});
+    kernel->push_back(vector<int>{1, 2, 1});
+    *div = (float) 16;
+    return kernel;
+}
+
+vector<vector<int>> *getKx(float *div)
+{
+    vector<vector<int>> *kernel = new vector<vector<int>>();
+    kernel->push_back(vector<int>{-1, 0, 1});
+    kernel->push_back(vector<int>{-2, 0, 2});
+    kernel->push_back(vector<int>{-1, 0, 1});
+    *div = (float) 1;
+    return kernel;
+}
+
+
+vector<vector<int>> *getKy(float *div)
+{
+    vector<vector<int>> *kernel = new vector<vector<int>>();
+    kernel->push_back(vector<int>{1, 2, 1});
+    kernel->push_back(vector<int>{0, 0, 0});
+    kernel->push_back(vector<int>{-1, -2, -1});
+    *div = (float) 1;
+    return kernel;
+}
+
+void *paddingBlackBorder(vector<vector<unsigned char>> *pixels)
+{
+    static unsigned char BLACK = 0;
+
+    int height = pixels->size();
+    int width = (*pixels)[0].size();
+
+    vector<unsigned char> black_row;
+    for (int i = 0; i < width + 2; i++)
+        black_row.push_back(BLACK);
+    for (int i = 0; i < height; i++)
+    {
+        (*pixels)[i].push_back(BLACK);
+        (*pixels)[i].insert((((*pixels)[i]).begin()), BLACK);
+    }
+    pixels->push_back(black_row);
+    pixels->insert(pixels->begin(), black_row);
+}
+
+vector<vector<unsigned char>> *applyFilter(vector<vector<unsigned char>> *pixels, vector<vector<int>> *kernel, float div)
+{
+    int height = pixels->size();
+    int width = pixels[0].size();
+
+    int kernel_size = kernel->size();
+    int size = (int)(kernel_size / 2);
+
+    vector<vector<unsigned char>> *filtered = new vector<vector<unsigned char>>();
+    
+
+    for (int i = 1; i < height - size; i++)
+	{
+        vector<unsigned char> row;
+		for (int j = 1; j < width - size; j++)
+		{
+			float sum = 0;
+            
+			for (int x = 0; x < kernel_size; x++)
+				for (int y = 0; y < kernel_size; y++)
+				{
+                    sum += (*kernel)[x][y] * (*pixels)[i + x - size][j + y - size];
+				}
+            sum = ((float)sum) / div;
+            unsigned char new_pixel = (char)((int) min(max(sum, (float)0), (float)255));
+            row.push_back(new_pixel);
+		}
+        filtered->push_back(row);
+	}
+    paddingBlackBorder(filtered);
+    return filtered;
+}
+
+vector<vector<unsigned char>> *canny(vector<vector<unsigned char>> *pixels)
+{
+    float div_g;
+    vector<vector<int>> *gaussian_kernel = getGaussianKernel(&div_g);
+    vector<vector<unsigned char>> *gaussianed = applyFilter(pixels, gaussian_kernel, div_g);
+
+    float div_x, div_y;
+
+    vector<vector<int>> *k_x = getKx(&div_x);
+    vector<vector<int>> *k_y = getKy(&div_y);
+
+    vector<vector<unsigned char>> *sobel = applyFilter(gaussianed, k_x, div_x);
+    sobel = applyFilter(sobel, k_y, div_y);
+
+    return sobel;
+}

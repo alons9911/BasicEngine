@@ -29,11 +29,17 @@ Texture::Texture(const std::string& fileName)
     //unsigned char *newArray = grayImageToOriginalRgbaTemplate(halftoned, inflatePixelsToSquare(data, 256, 256), width * 2, height * 2);
     unsigned char *newArrayHalftone = inflatePixelsToRGBA(halftoned, width * 2, height * 2);
     cout << height << ", " << width << endl;
+    
+    vector<vector<unsigned char>> *cannyed = canny(matrix);
+    unsigned char *newArrayCanny = inflatePixelsToRGBA(cannyed, width, height);
+
+    
 
     data = newArrayFloyd;
     data = newArrayHalftone;
-    width *= 2;
-    height *= 2;
+    data = newArrayCanny;
+    //width *= 2;
+    //height *= 2;
     // new code
 	
     if(data == NULL)
