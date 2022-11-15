@@ -1,6 +1,7 @@
 #include <vector>
 #include <cstdlib>
 #include <iostream>
+#include <math.h>
 #include <cmath>
 
 using namespace std;
@@ -307,14 +308,159 @@ vector<vector<unsigned char>> *applySobel(vector<vector<unsigned char>> *pixels)
     return sobel;
 }
 
+vector<vector<unsigned char>> *createZeroMatrix(int height, int width){
+    vector<vector<unsigned char>> *zero_matrix = new vector<vector<unsigned char>>();
+
+    for (int i = 0; i < height; i++)
+	{
+        vector<unsigned char> row;
+		for (int j = 0; j < width; j++)
+			row.push_back(0);
+        zero_matrix->push_back(row);
+	}
+    return zero_matrix;
+}
+
+vector<vector<float>> *createAngelsMatrix(vector<vector<unsigned char>> *pixels, int height, int width){
+    vector<vector<float>> *angels = new vector<vector<float>>();
+
+    for (int i = 0; i < height; i++)
+	{
+        vector<float> row;
+		for (int j = 0; j < width; j++){
+            float pixel = (float)(*pixels)[i][j] * 180.0 / M_PI;
+            if (pixel < 0)
+            {
+                pixel += 180.0;
+            }
+            
+            row.push_back(pixel);
+        }
+        angels->push_back(row);
+	}
+    return angels;
+}
+
+vector<vector<unsigned char>> *nonMaxSuppression(vector<vector<unsigned char>> *pixels) 
+{
+    int height = pixels->size();
+    int width = pixels[0].size();
+   
+    vector<vector<unsigned char>> *zero_matrix = createZeroMatrix(height, width);
+
+    vector<vector<float>> *angles = createAngelsMatrix(pixels, height, width);
+
+    for (int i = 1; i < height - 1; i++)
+    {
+        for (int j = 1; j < width - 1; j++)
+        {
+            unsigned char q = 255, r = 255;
+            if ((0 <= (*angles)[i][j] < 22.5) | (157.5 <= (*angles)[i][j] <= 180)){
+                q = (*pixels)[i][j + 1];
+                r = (*pixels)[i][j - 1];
+            }
+            else if (22.5 <= (*angles)[i][j] < 67.5){
+                q = (*pixels)[i + 1][j - 1];
+                r = (*pixels)[i - 1][j + 1];
+            }
+            else if (67.5 <= (*angles)[i][j] < 112.5){
+                q = (*pixels)[i + 1][j];
+                r = (*pixels)[i - 1][j];
+            }
+            else if (112.5 <= (*angles)[i][j] < 157.5){
+                q = (*pixels)[i - 1][j - 1];
+                r = (*pixels)[i + 1][j + 1];
+            }    
+            
+            if (((*pixels)[i][j] >= q) & ((*pixels)[i][j] >= r))
+                (*zero_matrix)[i][j] = (*pixels)[i][j];  
+            
+        }
+        
+    }
+    return zero_matrix;
+}
+
+unsigned char getMaxValue(vector<vector<unsigned char>> *matrix, int height, int width)
+{
+    unsigned char max_value = 0;
+    for (int i = 0; i < height; i++)
+        for (int j = 0; j < width; j++)
+            max_value = max(max_value, (*matrix)[i][j]);
+    return max_value;
+}
+
+unsigned char WEAK = 50, STRONG = 255;
+
+vector<vector<unsigned char>> *threshold(vector<vector<unsigned char>> *pixels, float low_threshold_ratio, float high_threshould_ratio)
+{
+    int height = pixels->size();
+    int width = pixels[0].size();
+    
+    unsigned char max_value = getMaxValue(pixels, height, width);
+    unsigned char low_threshold = (unsigned char)((int) (max_value * low_threshold_ratio));
+    unsigned char high_threshold = (unsigned char)((int) (max_value * high_threshould_ratio));
+
+    vector<vector<unsigned char>> *thresholded_matrix = new vector<vector<unsigned char>>();
+
+    for (int i = 0; i < height; i++)
+	{
+        vector<unsigned char> row;
+		for (int j = 0; j < width; j++){
+            if ((*pixels)[i][j] >= high_threshold)
+                row.push_back(STRONG);
+            else if ((*pixels)[i][j] < low_threshold)
+                row.push_back(0);
+            else
+                row.push_back(WEAK);
+        }
+			row.push_back(0);
+        thresholded_matrix->push_back(row);
+	}
+    return thresholded_matrix;
+}
+
+vector<vector<unsigned char>> *hysteresis(vector<vector<unsigned char>> *thresholds)
+{
+    int height = thresholds->size();
+    int width = thresholds[0].size();
+    
+    for (int i = 0; i < height; i++)
+	{
+		for (int j = 0; j < width; j++){
+            if ((*thresholds)[i][j] == WEAK){
+                if (isPointInRange(i - 1, j - 1, height - 1, width - 1) & ((*thresholds)[i - 1][j - 1] == STRONG))
+                    (*thresholds)[i][j] = STRONG;
+                else if (isPointInRange(i - 1, j, height - 1, width - 1) & ((*thresholds)[i - 1][j] == STRONG))
+                    (*thresholds)[i][j] = STRONG;
+                else if (isPointInRange(i - 1, j + 1, height - 1, width - 1) & ((*thresholds)[i - 1][j + 1] == STRONG))
+                    (*thresholds)[i][j] = STRONG;
+                else if (isPointInRange(i, j - 1, height - 1, width - 1) & ((*thresholds)[i][j - 1] == STRONG))
+                    (*thresholds)[i][j] = STRONG;
+                else if (isPointInRange(i, j + 1, height - 1, width - 1) & ((*thresholds)[i][j + 1] == STRONG))
+                    (*thresholds)[i][j] = STRONG;
+                else if (isPointInRange(i + 1, j - 1, height - 1, width - 1) & ((*thresholds)[i + 1][j - 1] == STRONG))
+                    (*thresholds)[i][j] = STRONG;
+                else if (isPointInRange(i + 1, j, height - 1, width - 1) & ((*thresholds)[i + 1][j] == STRONG))
+                    (*thresholds)[i][j] = STRONG;
+                else if (isPointInRange(i + 1, j + 1, height - 1, width - 1) & ((*thresholds)[i - 1][j + 1] == STRONG))
+                    (*thresholds)[i][j] = STRONG;
+                else
+                    (*thresholds)[i][j] = 0;
+
+            }
+        }
+	}
+    return thresholds;
+}
 
 vector<vector<unsigned char>> *canny(vector<vector<unsigned char>> *pixels)
 {
     float div_g;
     vector<vector<int>> *gaussian_kernel = getGaussianKernel(&div_g);
     vector<vector<unsigned char>> *gaussianed = applyFilter(pixels, gaussian_kernel, div_g);
-
-    vector<vector<unsigned char>> *sobel = applySobel(gaussianed); 
-
-    return sobel;
+    vector<vector<unsigned char>> *sobel = applySobel(gaussianed);
+    vector<vector<unsigned char>> *thined_edges = nonMaxSuppression(sobel); 
+    vector<vector<unsigned char>> *canny_filtered = hysteresis(threshold(thined_edges, 0.1, 0.3)); 
+    return canny_filtered;
 }
