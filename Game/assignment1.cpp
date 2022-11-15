@@ -1,4 +1,5 @@
 #include <vector>
+#include <cstdlib>
 using namespace std;
 
 unsigned char trunc16Colors(unsigned char pixel)
@@ -131,6 +132,44 @@ vector<vector<unsigned char>> *floyedSteinberg(vector<vector<unsigned char>> *pi
                 copy[i + 1][j + 1] += DELTA * error;
         }
         newPixels->push_back(row);
+    }
+    return newPixels;
+}
+
+vector<vector<unsigned char>> *halftone(vector<vector<unsigned char>> *pixels)
+{
+
+    int height = pixels->size();
+    int width = pixels[0].size();
+
+    vector<vector<unsigned char>> *newPixels = new vector<vector<unsigned char>>();
+
+    unsigned char WHITE = 0;
+    unsigned char BLACK = 255;
+
+    unsigned char HALFTONE_PATTERNS[5][4] = 
+    {
+        {WHITE, WHITE, WHITE, WHITE},
+        {WHITE, WHITE, BLACK, WHITE},
+        {WHITE, BLACK, BLACK, WHITE},
+        {WHITE, BLACK, BLACK, BLACK},
+        {BLACK, BLACK, BLACK, BLACK}
+    };
+
+
+    for (int i = 0; i < width; i++)
+    {
+        vector<unsigned char> row1, row2;
+        for (int j = 0; j < height; j++)
+        {
+            int pattern = (4 * (*pixels)[i][j]) / 255;
+            row1.push_back(HALFTONE_PATTERNS[pattern][0]);
+            row1.push_back(HALFTONE_PATTERNS[pattern][1]);
+            row2.push_back(HALFTONE_PATTERNS[pattern][2]);
+            row2.push_back(HALFTONE_PATTERNS[pattern][3]);
+        }
+        newPixels->push_back(row1);
+        newPixels->push_back(row2);
     }
     return newPixels;
 }

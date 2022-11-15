@@ -22,6 +22,9 @@ Texture::Texture(const std::string& fileName)
     //unsigned char* newArray = matrixToArray(floyed_steinberged, &width, &height);
     //unsigned char* newArray = matrixToArray(matrix, &width, &height);
     unsigned char* newArray = grayImageToOriginalRgbaTemplate(floyed_steinberged, data, width, height);
+    
+    vector<vector<unsigned char>> *halftoned = halftone(matrix);
+
     cout << compareArrays(data, newArray, width * height);
 
     data = newArray;
