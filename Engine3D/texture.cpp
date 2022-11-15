@@ -21,15 +21,19 @@ Texture::Texture(const std::string& fileName)
 	vector<vector<unsigned char>> *floyed_steinberged = floyedSteinberg(matrix);
     //unsigned char* newArray = matrixToArray(floyed_steinberged, &width, &height);
     //unsigned char* newArray = matrixToArray(matrix, &width, &height);
-    //unsigned char* newArray = grayImageToOriginalRgbaTemplate(floyed_steinberged, data, width, height);
+    unsigned char* newArrayFloyd = inflatePixelsToRGBA(floyed_steinberged, width, height);
     
     vector<vector<unsigned char>> *halftoned = halftone(matrix);
-    unsigned char *orig = (unsigned char*)(malloc(width * height * 4));
-    unsigned char *newArray = grayImageToOriginalRgbaTemplate(halftoned, orig, width * 2, height * 2);
+    //unsigned char *orig = (unsigned char*)(malloc(width * height * 4));
+    //unsigned char *newArray = matrixToArray(halftoned, &width, &height);
+    //unsigned char *newArray = grayImageToOriginalRgbaTemplate(halftoned, inflatePixelsToSquare(data, 256, 256), width * 2, height * 2);
+    unsigned char *newArrayHalftone = inflatePixelsToRGBA(halftoned, width * 2, height * 2);
+    cout << height << ", " << width << endl;
 
-    cout << compareArrays(data, newArray, width * height);
-
-    data = newArray;
+    data = newArrayFloyd;
+    data = newArrayHalftone;
+    width *= 2;
+    height *= 2;
     // new code
 	
     if(data == NULL)

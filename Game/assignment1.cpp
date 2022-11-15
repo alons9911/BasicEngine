@@ -31,22 +31,6 @@ unsigned char *deepCopyArray(unsigned char *array, int size){
     return copy;
 }
 
-unsigned char *grayImageToOriginalRgbaTemplate(vector<vector<unsigned char>> *grayImage, unsigned char *original, int width, int height){
-    unsigned char *newImage = deepCopyArray(original, width * height * 4);
-    
-    for (int i = 0; i < width; i++)
-    {
-        for (int j = 0; j < height; j++)
-        {
-            newImage[4 * (i * width + j)] = (*grayImage)[i][j];
-            newImage[4 * (i * width + j) + 1] = (*grayImage)[i][j];
-            newImage[4 * (i * width + j) + 2] = (*grayImage)[i][j];
-            cout << "i: " << i << ", j: " << j << endl;
-        }
-    }
-    return newImage;
-}
-
 vector<vector<unsigned char>> *arrayToMatrix(unsigned char *array, int width, int height)
 {
     vector<vector<unsigned char>> *matrix = new vector<vector<unsigned char>>();
@@ -59,6 +43,40 @@ vector<vector<unsigned char>> *arrayToMatrix(unsigned char *array, int width, in
     }
     return matrix;
 }
+
+unsigned char *inflatePixelsToSquare(unsigned char *pixels, int width, int height)
+{
+    unsigned char *inflated = (unsigned char*)(malloc(width * height * 4));
+    for (int i = 0; i < width; i++)
+    {
+        for (int j = 0; j < height; j++)
+        {
+            inflated[(i * 2) * (width * 2) + (j * 2)] = pixels[i * width + j];
+            inflated[(i * 2 + 1) * (width * 2) + (j * 2)] = pixels[i * width + j];
+            inflated[(i * 2) * (width * 2) + (j * 2 + 1)] = pixels[i * width + j];
+            inflated[(i * 2 + 1) * (width * 2) + (j * 2 + 1)] = pixels[i * width + j];
+        }  
+    }
+    return inflated;
+}
+
+unsigned char *inflatePixelsToRGBA(vector<vector<unsigned char>> *pixels, int width, int height)
+{
+    static char ALPHA = 255;
+    unsigned char *inflated = (unsigned char*)(malloc(width * height * 4));
+    for (int i = 0; i < width; i++)
+    {
+        for (int j = 0; j < height; j++)
+        {
+            inflated[4 * (i * width + j)] = (*pixels)[i][j];
+            inflated[4 * (i * width + j) + 1] = (*pixels)[i][j];
+            inflated[4 * (i * width + j) + 2] = (*pixels)[i][j];
+            inflated[4 * (i * width + j) + 3] = ALPHA;
+        }  
+    }
+    return inflated;
+}
+
 
 unsigned char *matrixToArray(vector<vector<unsigned char>> *matrix, int *width, int *height)
 {
