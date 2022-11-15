@@ -1,5 +1,7 @@
 #include <vector>
 #include <cstdlib>
+#include <iostream>
+
 using namespace std;
 
 unsigned char trunc16Colors(unsigned char pixel)
@@ -31,6 +33,7 @@ unsigned char *deepCopyArray(unsigned char *array, int size){
 
 unsigned char *grayImageToOriginalRgbaTemplate(vector<vector<unsigned char>> *grayImage, unsigned char *original, int width, int height){
     unsigned char *newImage = deepCopyArray(original, width * height * 4);
+    
     for (int i = 0; i < width; i++)
     {
         for (int j = 0; j < height; j++)
@@ -38,6 +41,7 @@ unsigned char *grayImageToOriginalRgbaTemplate(vector<vector<unsigned char>> *gr
             newImage[4 * (i * width + j)] = (*grayImage)[i][j];
             newImage[4 * (i * width + j) + 1] = (*grayImage)[i][j];
             newImage[4 * (i * width + j) + 2] = (*grayImage)[i][j];
+            cout << "i: " << i << ", j: " << j << endl;
         }
     }
     return newImage;
