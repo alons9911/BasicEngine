@@ -1,6 +1,7 @@
 #include <vector>
 #include <cstdlib>
 #include <iostream>
+#include <cmath>
 
 using namespace std;
 
@@ -279,19 +280,41 @@ vector<vector<unsigned char>> *applyFilter(vector<vector<unsigned char>> *pixels
     return filtered;
 }
 
+
+vector<vector<unsigned char>> *applySobel(vector<vector<unsigned char>> *pixels)
+{
+    float div_x, div_y;
+
+    vector<vector<int>> *k_x = getKx(&div_x);
+    vector<vector<int>> *k_y = getKy(&div_y);
+
+    vector<vector<unsigned char>> *filtered_x = applyFilter(pixels, k_x, div_x);
+    vector<vector<unsigned char>> *filtered_y = applyFilter(pixels, k_y, div_y);
+
+    int height = pixels->size();
+    int width = pixels[0].size();
+    vector<vector<unsigned char>> *sobel = filtered_x;
+
+    for (int i = 1; i < height; i++)
+    {
+        for (int j = 1; j < width; j++)
+        {
+            unsigned char pixel_x = (*filtered_x)[i][j];
+            unsigned char pixel_y = (*filtered_y)[i][j];
+            (*sobel)[i][j] = (unsigned char)((int)sqrt((pixel_x * pixel_x) + (pixel_y * pixel_y)));
+        }
+    }
+    return sobel;
+}
+
+
 vector<vector<unsigned char>> *canny(vector<vector<unsigned char>> *pixels)
 {
     float div_g;
     vector<vector<int>> *gaussian_kernel = getGaussianKernel(&div_g);
     vector<vector<unsigned char>> *gaussianed = applyFilter(pixels, gaussian_kernel, div_g);
 
-    float div_x, div_y;
-
-    vector<vector<int>> *k_x = getKx(&div_x);
-    vector<vector<int>> *k_y = getKy(&div_y);
-
-    vector<vector<unsigned char>> *sobel = applyFilter(gaussianed, k_x, div_x);
-    sobel = applyFilter(sobel, k_y, div_y);
+    vector<vector<unsigned char>> *sobel = applySobel(gaussianed); 
 
     return sobel;
 }
