@@ -2,6 +2,8 @@
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
+#include "../Engine3D/stb_image.h"
+#include "assignment1.cpp"
 using namespace std;
 
 
@@ -30,13 +32,35 @@ void Game::Init()
 	AddShader("../res/shaders/pickingShader");	
 	AddShader("../res/shaders/basicShader");
 	
-	AddTexture("../res/textures/lena256.jpg",false);
+	//AddTexture("../res/textures/lena256.jpg",false);
 
 	AddShape(Plane,-1,TRIANGLES);
+
+
+	// new code 
+	int width, height, numComponents;
+	unsigned char* data = stbi_load("../res/textures/lena256.jpg", &width, &height, &numComponents, 4);
+	
+	vector<vector<unsigned char>> *grayscale = imageToGray(data, width, height);
+	unsigned char *grayscaled_data = inflatePixelsToRGBA(grayscale, width, height);
+	AddTexture(width, height, grayscaled_data);
+
+	vector<vector<unsigned char>> *floyed_steinberged = floyedSteinberg(grayscale);
+    unsigned char *floyed_data = inflatePixelsToRGBA(floyed_steinberged, width, height);
+    AddTexture(width, height, floyed_data);
+
+    vector<vector<unsigned char>> *halftoned = halftone(grayscale);
+    unsigned char *halftoned_data = inflatePixelsToRGBA(halftoned, width * 2, height * 2);
+    AddTexture(width * 2, height * 2, halftoned_data);
+
+    vector<vector<unsigned char>> *cannyed = cannyAlgorithm(grayscale);
+    unsigned char *canny_data = inflatePixelsToRGBA(cannyed, width, height);
+	AddTexture(width, height, canny_data);
+
+    // new code
 	
 	pickedShape = 0;
-	
-	SetShapeTex(0,0);
+
 	MoveCamera(0,zTranslate,10);
 	pickedShape = -1;
 	

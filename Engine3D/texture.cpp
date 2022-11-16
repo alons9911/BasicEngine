@@ -5,42 +5,12 @@
 #include "stb_image.h"
 #include "../res/includes/glad/include/glad/glad.h"
 #include <iostream>
-#include <vector>
-#include "../Game/assignment1.cpp"
 using namespace std;
 
 Texture::Texture(const std::string& fileName)
 {
 	int width, height, numComponents;
     unsigned char* data = stbi_load((fileName).c_str(), &width, &height, &numComponents, 4);
-
-    // new code
-	std::cout<<width<<" "<<height<<" "<<numComponents;
-	std::cout<<std::endl;
-	vector<vector<unsigned char>> *matrix = imageToGray(data, height, width);
-	vector<vector<unsigned char>> *floyed_steinberged = floyedSteinberg(matrix);
-    //unsigned char* newArray = matrixToArray(floyed_steinberged, &width, &height);
-    //unsigned char* newArray = matrixToArray(matrix, &width, &height);
-    unsigned char* newArrayFloyd = inflatePixelsToRGBA(floyed_steinberged, width, height);
-    
-    vector<vector<unsigned char>> *halftoned = halftone(matrix);
-    //unsigned char *orig = (unsigned char*)(malloc(width * height * 4));
-    //unsigned char *newArray = matrixToArray(halftoned, &width, &height);
-    //unsigned char *newArray = grayImageToOriginalRgbaTemplate(halftoned, inflatePixelsToSquare(data, 256, 256), width * 2, height * 2);
-    unsigned char *newArrayHalftone = inflatePixelsToRGBA(halftoned, width * 2, height * 2);
-    cout << height << ", " << width << endl;
-    
-    vector<vector<unsigned char>> *cannyed = canny(matrix);
-    unsigned char *newArrayCanny = inflatePixelsToRGBA(cannyed, width, height);
-
-    
-
-    data = newArrayFloyd;
-    data = newArrayHalftone;
-    data = newArrayCanny;
-    //width *= 2;
-    //height *= 2;
-    // new code
 	
     if(data == NULL)
 		std::cerr << "Unable to load texture: " << fileName << std::endl;

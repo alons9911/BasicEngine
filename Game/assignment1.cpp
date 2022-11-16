@@ -18,7 +18,10 @@ vector<vector<unsigned char>> *imageToGray(unsigned char *pixels, int width, int
         vector<unsigned char> row;
         for (int j = 0; j < height; j++)
         {
-            char grayPixel = (pixels[4 * (i * width + j)] + pixels[4 * (i * width + j) + 1] + pixels[4 * (i * width + j) + 2]) / 3;
+            int r = 4 * (i * width + j);
+            int g = 4 * (i * width + j) + 1;
+            int b = 4 * (i * width + j) + 2;
+            char grayPixel = (pixels[r] + pixels[g] + pixels[b]) / 3;
             row.push_back(grayPixel);
         }
         grayImage->push_back(row);
@@ -443,7 +446,7 @@ vector<vector<unsigned char>> *hysteresis(vector<vector<unsigned char>> *thresho
                     (*thresholds)[i][j] = STRONG;
                 else if (isPointInRange(i + 1, j, height - 1, width - 1) & ((*thresholds)[i + 1][j] == STRONG))
                     (*thresholds)[i][j] = STRONG;
-                else if (isPointInRange(i + 1, j + 1, height - 1, width - 1) & ((*thresholds)[i - 1][j + 1] == STRONG))
+                else if (isPointInRange(i + 1, j + 1, height - 1, width - 1) & ((*thresholds)[i + 1][j + 1] == STRONG))
                     (*thresholds)[i][j] = STRONG;
                 else
                     (*thresholds)[i][j] = 0;
@@ -454,7 +457,7 @@ vector<vector<unsigned char>> *hysteresis(vector<vector<unsigned char>> *thresho
     return thresholds;
 }
 
-vector<vector<unsigned char>> *canny(vector<vector<unsigned char>> *pixels)
+vector<vector<unsigned char>> *cannyAlgorithm(vector<vector<unsigned char>> *pixels)
 {
     float div_g;
     vector<vector<int>> *gaussian_kernel = getGaussianKernel(&div_g);
