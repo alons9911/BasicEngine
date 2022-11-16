@@ -30,41 +30,6 @@ vector<vector<unsigned char>> *imageToGray(unsigned char *pixels, int width, int
     return grayImage;
 }
 
-unsigned char *deepCopyArray(unsigned char *array, int size){
-    unsigned char *copy = (unsigned char*)(malloc(size));
-    for (int i = 0; i < size; i++)
-        copy[i] = array[i];
-    return copy;
-}
-
-vector<vector<unsigned char>> *arrayToMatrix(unsigned char *array, int width, int height)
-{
-    vector<vector<unsigned char>> *matrix = new vector<vector<unsigned char>>();
-    for (int i = 0; i < height; i++)
-    {
-        std::vector<unsigned char> row;
-        for (int j = 0; j < width; j++)
-            row.push_back(array[i * width + j]);
-        matrix->push_back(row);
-    }
-    return matrix;
-}
-
-unsigned char *inflatePixelsToSquare(unsigned char *pixels, int width, int height)
-{
-    unsigned char *inflated = (unsigned char*)(malloc(width * height * 4));
-    for (int i = 0; i < width; i++)
-    {
-        for (int j = 0; j < height; j++)
-        {
-            inflated[(i * 2) * (width * 2) + (j * 2)] = pixels[i * width + j];
-            inflated[(i * 2 + 1) * (width * 2) + (j * 2)] = pixels[i * width + j];
-            inflated[(i * 2) * (width * 2) + (j * 2 + 1)] = pixels[i * width + j];
-            inflated[(i * 2 + 1) * (width * 2) + (j * 2 + 1)] = pixels[i * width + j];
-        }  
-    }
-    return inflated;
-}
 
 unsigned char *inflatePixelsToRGBA(vector<vector<unsigned char>> *pixels, int width, int height)
 {
@@ -81,33 +46,6 @@ unsigned char *inflatePixelsToRGBA(vector<vector<unsigned char>> *pixels, int wi
         }  
     }
     return inflated;
-}
-
-
-unsigned char *matrixToArray(vector<vector<unsigned char>> *matrix, int *width, int *height)
-{
-    *width = matrix -> size();
-    *height = (*matrix)[0].size();
-    unsigned char *array = (unsigned char*)(malloc(4 * (*width) * (*height)));
-
-    for (int i = 0; i < (*height) * (*width); i++)
-    {
-        array[i] = (*matrix)[i / (*width)][i - ((i / *width) * (*width))];
-        //for (int j = 0; j < *width; j++){
-        //    array[i * (*width) + j] = (*matrix)[i][j];
-        //    cout << "i: "<< i << ", j: " << j << ", i * width + j:"<<  (i * (*width) + j)<<endl;
-        //}
-    }
-    return array;
-}
-
-
-
-bool compareArrays(unsigned char *arr1, unsigned char *arr2, int size){
-    for (int i = 0; i < size; i++)
-        if (arr1[i] != arr2[i])
-            return false;
-    return true;
 }
 
 vector<vector<unsigned char>> *deepCopyMatrix(vector<vector<unsigned char>> *matrix)
