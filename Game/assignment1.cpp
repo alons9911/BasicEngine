@@ -1,6 +1,7 @@
 #include <vector>
 #include <cstdlib>
 #include <iostream>
+#include <fstream>
 #include <math.h>
 #include <cmath>
 
@@ -466,4 +467,22 @@ vector<vector<unsigned char>> *cannyAlgorithm(vector<vector<unsigned char>> *pix
     vector<vector<unsigned char>> *thined_edges = nonMaxSuppression(sobel); 
     vector<vector<unsigned char>> *canny_filtered = hysteresis(threshold(thined_edges, 0.1, 0.3)); 
     return canny_filtered;
+}
+
+void dumpToFile(vector<vector<unsigned char>> *picture, const string &file_name, int width, int height, int intensity){
+    ofstream file;
+    file.open(file_name);
+
+    int i = 0, j = 0;
+    for (i = 0; i < height - 1; i++)
+	{
+		for (j = 0; j < width; j++){
+            file << (int)(((*picture)[i][j] - ((*picture)[i][j] % intensity) + 1) / (256 / intensity)) << ",";
+        }
+    }
+    for (j = 0; j < width - 1; j++){
+        file << (int)(((*picture)[i][j] - ((*picture)[i][j] % intensity) + 1) / (256 / intensity)) << ",";
+    }
+    file << (int)(((*picture)[i][j] - ((*picture)[i][j] % intensity) + 1) / (256 / intensity)) << endl;
+    file.close();
 }

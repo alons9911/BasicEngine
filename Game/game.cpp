@@ -46,14 +46,17 @@ void Game::Init()
 	AddTexture(width, height, grayscaled_data);
 
 	vector<vector<unsigned char>> *floyed_steinberged = floyedSteinberg(grayscale);
+	dumpToFile(floyed_steinberged, "../img6.txt", width, height, 16);
     unsigned char *floyed_data = inflatePixelsToRGBA(floyed_steinberged, width, height);
     AddTexture(width, height, floyed_data);
 
     vector<vector<unsigned char>> *halftoned = halftone(grayscale);
+	dumpToFile(halftoned, "../img5.txt", width * 2, height * 2, 1);
     unsigned char *halftoned_data = inflatePixelsToRGBA(halftoned, width * 2, height * 2);
     AddTexture(width * 2, height * 2, halftoned_data);
 
     vector<vector<unsigned char>> *cannyed = cannyAlgorithm(grayscale);
+	dumpToFile(cannyed, "../img4.txt", width, height, 1);
     unsigned char *canny_data = inflatePixelsToRGBA(cannyed, width, height);
 	AddTexture(width, height, canny_data);
 
