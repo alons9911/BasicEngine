@@ -95,16 +95,16 @@
 		switch (corner)
 		{
 		case 1:
-			glViewport(0, 0, 400, 400);
+			glViewport(0, 0, 256, 256);
 			break;
 		case 2:
-			glViewport(0, 400, 400, 800);
+			glViewport(0, 256, 256, 256);
 			break;
 		case 3:
-			glViewport(400, 0, 800, 400);
+			glViewport(256, 0, 256, 256);
 			break;
 		case 4:
-			glViewport(400, 400, 800, 800);
+			glViewport(256, 256, 256, 256);
 			break;
 		default:
 			break;

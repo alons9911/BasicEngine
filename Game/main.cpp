@@ -42,8 +42,8 @@ static void printVectorMat(std::vector<std::vector<unsigned char>> mat)
 
 int main(int argc,char *argv[])
 {
-	const int DISPLAY_WIDTH = 800;
-	const int DISPLAY_HEIGHT = 800;
+	const int DISPLAY_WIDTH = 512;
+	const int DISPLAY_HEIGHT = 512;
 	const float CAMERA_ANGLE = 0.0f;
 	const float NEAR = 1.0f;
 	const float FAR = 100.0f;
@@ -62,11 +62,11 @@ int main(int argc,char *argv[])
 	{
 		
 		scn->SetShapeTex(0,0);
-		scn->Draw(1,0,scn->BACK,true,false, 1);
+		scn->Draw(1,0,scn->BACK,true,false, 2);
 		scn->SetShapeTex(0,1);
-		scn->Draw(1,0,scn->BACK,false,false, 2);
-		scn->SetShapeTex(0,2);
 		scn->Draw(1,0,scn->BACK,false,false, 3);
+		scn->SetShapeTex(0,2);
+		scn->Draw(1,0,scn->BACK,false,false, 1);
 		scn->SetShapeTex(0,3);
 		scn->Draw(1,0,scn->BACK,false,false, 4);
 
