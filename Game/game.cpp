@@ -1,6 +1,11 @@
 #include "game.h"
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
+#include <vector>
+#include "../Engine3D/stb_image.h"
+#include "assignment1.cpp"
+using namespace std;
+
 
 static void printMat(const glm::mat4 mat)
 {
@@ -27,13 +32,38 @@ void Game::Init()
 	AddShader("../res/shaders/pickingShader");	
 	AddShader("../res/shaders/basicShader");
 	
-	AddTexture("../res/textures/box0.bmp",false);
+	//AddTexture("../res/textures/lena256.jpg",false);
 
 	AddShape(Plane,-1,TRIANGLES);
+
+
+	// new code 
+	int width, height, numComponents;
+	unsigned char* data = stbi_load("../res/textures/lena256.jpg", &width, &height, &numComponents, 4);
+	
+	vector<vector<unsigned char>> *grayscale = imageToGray(data, width, height);
+	unsigned char *grayscaled_data = inflatePixelsToRGBA(grayscale, width, height);
+	AddTexture(width, height, grayscaled_data);
+
+	vector<vector<unsigned char>> *floyed_steinberged = floyedSteinberg(grayscale);
+	dumpToFile(floyed_steinberged, "../img6.txt", width, height, 16);
+    unsigned char *floyed_data = inflatePixelsToRGBA(floyed_steinberged, width, height);
+    AddTexture(width, height, floyed_data);
+
+    vector<vector<unsigned char>> *halftoned = halftone(grayscale);
+	dumpToFile(halftoned, "../img5.txt", width * 2, height * 2, 1);
+    unsigned char *halftoned_data = inflatePixelsToRGBA(halftoned, width * 2, height * 2);
+    AddTexture(width * 2, height * 2, halftoned_data);
+
+    vector<vector<unsigned char>> *cannyed = cannyAlgorithm(grayscale);
+	dumpToFile(cannyed, "../img4.txt", width, height, 1);
+    unsigned char *canny_data = inflatePixelsToRGBA(cannyed, width, height);
+	AddTexture(width, height, canny_data);
+
+    // new code
 	
 	pickedShape = 0;
-	
-	SetShapeTex(0,0);
+
 	MoveCamera(0,zTranslate,10);
 	pickedShape = -1;
 	

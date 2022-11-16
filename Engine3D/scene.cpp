@@ -78,7 +78,7 @@
 		cameras.back()->MyTranslate(pos,0);
 	}
 
-	void Scene::Draw(int shaderIndx,int cameraIndx,int buffer,bool toClear,bool debugMode)
+	void Scene::Draw(int shaderIndx,int cameraIndx,int buffer,bool toClear,bool debugMode, int corner)
 	{
 		glEnable(GL_DEPTH_TEST);
 		glm::mat4 Normal = MakeTrans();
@@ -91,6 +91,23 @@
 				Clear(1,0,1,1);
 			else
 				Clear(0,0,0,0);
+		}
+		switch (corner)
+		{
+		case 1:
+			glViewport(0, 0, 256, 256);
+			break;
+		case 2:
+			glViewport(0, 256, 256, 256);
+			break;
+		case 3:
+			glViewport(256, 0, 256, 256);
+			break;
+		case 4:
+			glViewport(256, 256, 256, 256);
+			break;
+		default:
+			break;
 		}
 
 		for (unsigned int i=0; i<shapes.size();i++)

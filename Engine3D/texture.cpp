@@ -5,6 +5,7 @@
 #include "stb_image.h"
 #include "../res/includes/glad/include/glad/glad.h"
 #include <iostream>
+using namespace std;
 
 Texture::Texture(const std::string& fileName)
 {
