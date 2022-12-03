@@ -3,6 +3,8 @@
 #include "game.h"
 #include "../res/includes/glm/glm.hpp"
 
+#include "parser.cpp"
+
 int main(int argc,char *argv[])
 {
 	const int DISPLAY_WIDTH = 800;
@@ -10,6 +12,8 @@ int main(int argc,char *argv[])
 	const float CAMERA_ANGLE = 0.0f;
 	const float NEAR = 1.0f;
 	const float FAR = 100.0f;
+
+	parseInputFile("scene.txt");
 
 	Game *scn = new Game(CAMERA_ANGLE,(float)DISPLAY_WIDTH/DISPLAY_HEIGHT,NEAR,FAR);
 	
