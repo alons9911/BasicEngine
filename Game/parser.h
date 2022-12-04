@@ -22,7 +22,12 @@ struct eye : descriptor
     this->z = z;
     this->additional = additional;
   };
-  eye();
+  eye(){
+    this->x = 0;
+    this->y = 0;
+    this->z = 0;
+    this->additional = 0;
+  };
 
   float x;
   float y;
@@ -38,7 +43,12 @@ struct ambientLight : descriptor
     this->B = B;
     this->A = A;
   };
-  ambientLight();
+  ambientLight(){
+    this->R = 0;
+    this->G = 0;
+    this->B = 0;
+    this->A = 0;
+  };
   float R;
   float G;
   float B;
@@ -133,8 +143,17 @@ struct color : descriptor
 
 struct sceneDesription
 {
-  eye e;
-  ambientLight light;
+  sceneDesription(){
+    this->e = new eye();
+    this->light = new ambientLight();
+    this->lightDirs = new vector<lightDir>();
+    this->spotlightPositions = new vector<spotlightPosition>();
+    this->intensities = new vector<intensity>();
+    this->objects = new vector<objectDescriptor>();
+    this->colors = new vector<color>();
+  };
+  eye *e;
+  ambientLight *light;
   vector<lightDir> *lightDirs;
   vector<spotlightPosition> *spotlightPositions;
   vector<intensity> *intensities;
@@ -147,9 +166,9 @@ struct sceneDesription
 
 
 static sceneDesription parseInputFile(string fileName);
-static void parseLine(char op, float x1, float x2, float x3, float x4, sceneDesription scene);
-eye parseEye(float x1, float x2, float x3, float x4);
-ambientLight parseAmbientLight(float x1, float x2, float x3, float x4);
+static void parseLine(char op, float x1, float x2, float x3, float x4, sceneDesription *scene);
+eye *parseEye(float x1, float x2, float x3, float x4);
+ambientLight *parseAmbientLight(float x1, float x2, float x3, float x4);
 lightDir parseLightDirection(float x1, float x2, float x3, float x4);
 spotlightPosition parseSpotlightPosition(float x1, float x2, float x3, float x4);
 intensity parseLightIntensity(float x1, float x2, float x3, float x4);
