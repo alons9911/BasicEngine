@@ -1,6 +1,7 @@
 #include "game.h"
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
+#include "Tracer.cpp"
 
 static void printMat(const glm::mat4 mat)
 {
@@ -26,8 +27,14 @@ void Game::Init()
 
 	AddShader("../res/shaders/pickingShader");	
 	AddShader("../res/shaders/basicShader");
+
+	Tracer *tracer = new Tracer();
+	tracer->render();
+	unsigned char *data = tracer->getImageData();
+
+	AddTexture(800, 800, data);
 	
-	AddTexture("../res/textures/box0.bmp",false);
+	//AddTexture("../res/textures/box0.bmp",false);
 
 	AddShape(Plane,-1,TRIANGLES);
 	
