@@ -3,6 +3,7 @@
 #include "game.h"
 #include "../res/includes/glm/glm.hpp"
 
+#include "parser.h"
 #include "parser.cpp"
 
 int main(int argc,char *argv[])
@@ -13,8 +14,9 @@ int main(int argc,char *argv[])
 	const float NEAR = 1.0f;
 	const float FAR = 100.0f;
 
-	parseInputFile("/home/alon/Desktop/graphics/BasicEngine/Game/scene.txt");
-
+	sceneDesription sc = parseInputFile("/home/alon/Desktop/graphics/BasicEngine/Game/scene.txt");
+	printParsedInput(sc);
+	
 	Game *scn = new Game(CAMERA_ANGLE,(float)DISPLAY_WIDTH/DISPLAY_HEIGHT,NEAR,FAR);
 	
 	Display display(DISPLAY_WIDTH, DISPLAY_HEIGHT, "OpenGL");
