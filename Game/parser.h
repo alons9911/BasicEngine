@@ -16,7 +16,7 @@ struct objectDescriptor : descriptor
 
 struct eye : descriptor
 {
-  eye(float x, float y, float z, float additional){
+  eye(double x, double y, double z, double additional){
     this->x = x;
     this->y = y;
     this->z = z;
@@ -29,15 +29,15 @@ struct eye : descriptor
     this->additional = 0;
   };
 
-  float x;
-  float y;
-  float z;
-  float additional;
+  double x;
+  double y;
+  double z;
+  double additional;
 };
 
 struct ambientLight : descriptor
 {
-  ambientLight(float R, float G, float B, float A){
+  ambientLight(double R, double G, double B, double A){
     this->R = R;
     this->G = G;
     this->B = B;
@@ -49,96 +49,96 @@ struct ambientLight : descriptor
     this->B = 0;
     this->A = 0;
   };
-  float R;
-  float G;
-  float B;
-  float A;
+  double R;
+  double G;
+  double B;
+  double A;
 };
 
 struct lightDir : descriptor
 {
-  lightDir(float x, float y, float z, bool isSpotlight){
+  lightDir(double x, double y, double z, bool isSpotlight){
     this->x = x;
     this->y = y;
     this->z = z;
     this->isSpotlight = isSpotlight;
   };
-  float x;
-  float y;
-  float z;
+  double x;
+  double y;
+  double z;
   bool isSpotlight;
 };
 
 struct spotlightPosition : descriptor
 {
-  spotlightPosition(float x, float y, float z, float w){
+  spotlightPosition(double x, double y, double z, double w){
     this->x = x;
     this->y = y;
     this->z = z;
     this->w = w;
   };
-  float x;
-  float y;
-  float z;
-  float w;
+  double x;
+  double y;
+  double z;
+  double w;
 };
 
 struct intensity : descriptor
 {
-  intensity(float R, float G, float B, float A){
+  intensity(double R, double G, double B, double A){
     this->R = R;
     this->G = G;
     this->B = B;
     this->A = A;
   };
-  float R;
-  float G;
-  float B;
-  float A;
+  double R;
+  double G;
+  double B;
+  double A;
 };
 
 struct sphere : objectDescriptor
 {
-  sphere(float x, float y, float z, float raduis, objectType type){
+  sphere(double x, double y, double z, double raduis, objectType type){
     this->x = x;
     this->y = y;
     this->z = z;
     this->radius = radius;
     this->type = type;
   };
-  float x;
-  float y;
-  float z;
-  float radius;
+  double x;
+  double y;
+  double z;
+  double radius;
 };
 
 struct plane : objectDescriptor
 {
-  plane(float a, float b, float c, float d, objectType type){
+  plane(double a, double b, double c, double d, objectType type){
     this->a = a;
     this->b = b;
     this->c = c;
     this->d = d;
     this->type = type;
   };
-  float a;
-  float b;
-  float c;
-  float d;
+  double a;
+  double b;
+  double c;
+  double d;
 };
 
 struct color : descriptor
 {
-  color(float R, float G, float B, float A){
+  color(double R, double G, double B, double A){
     this->R = R;
     this->G = G;
     this->B = B;
     this->A = A;
   };
-  float R;
-  float G;
-  float B;
-  float A;
+  double R;
+  double G;
+  double B;
+  double A;
 };
 
 struct sceneDesription
@@ -166,15 +166,15 @@ struct sceneDesription
 
 
 static sceneDesription parseInputFile(string fileName);
-static void parseLine(char op, float x1, float x2, float x3, float x4, sceneDesription *scene);
-eye *parseEye(float x1, float x2, float x3, float x4);
-ambientLight *parseAmbientLight(float x1, float x2, float x3, float x4);
-lightDir parseLightDirection(float x1, float x2, float x3, float x4);
-spotlightPosition parseSpotlightPosition(float x1, float x2, float x3, float x4);
-intensity parseLightIntensity(float x1, float x2, float x3, float x4);
-color parseColor(float x1, float x2, float x3, float x4);
-sphere parseSphere(char op, float x1, float x2, float x3, float x4);
-plane parsePlane(char op, float x1, float x2, float x3, float x4);
+static void parseLine(char op, double x1, double x2, double x3, double x4, sceneDesription *scene);
+eye *parseEye(double x1, double x2, double x3, double x4);
+ambientLight *parseAmbientLight(double x1, double x2, double x3, double x4);
+lightDir parseLightDirection(double x1, double x2, double x3, double x4);
+spotlightPosition parseSpotlightPosition(double x1, double x2, double x3, double x4);
+intensity parseLightIntensity(double x1, double x2, double x3, double x4);
+color parseColor(double x1, double x2, double x3, double x4);
+sphere parseSphere(char op, double x1, double x2, double x3, double x4);
+plane parsePlane(char op, double x1, double x2, double x3, double x4);
 
 objectType getType(char c);
 

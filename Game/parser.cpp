@@ -11,7 +11,7 @@ static sceneDesription parseInputFile(string fileName)
     string brain_file;
 
     int n1, n2;
-    float x1, x2, x3, x4;
+    double x1, x2, x3, x4;
     char op, c;
 
     //if (!(infile >> n1 >> n2))
