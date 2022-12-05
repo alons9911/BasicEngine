@@ -12,7 +12,7 @@ public:
     Tracer() = default;
     void render();
     vector<vector<unsigned char>> *getFinalImage() {return finalImage;}
-    glm::vec3 calcPixelColor(glm::vec2 coordinate);
+    glm::vec4 calcPixelColor(glm::vec2 coordinate);
     unsigned char *getImageData() {return imageData;}
 
     int const IMG_HEIGHT = 800, IMG_WIDTH = 800;
