@@ -16,6 +16,7 @@ void Tracer::render() {
             imageData[4 * (x + y * IMG_WIDTH)] = (unsigned char) rgb.x;
             imageData[4 * (x + y * IMG_WIDTH) + 1] = (unsigned char) rgb.y;
             imageData[4 * (x + y * IMG_WIDTH) + 2] = (unsigned char) rgb.z;
+            imageData[4 * (x + y * IMG_WIDTH) + 3] = (unsigned char) 255;
 
         }
     }
