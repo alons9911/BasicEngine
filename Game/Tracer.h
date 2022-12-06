@@ -1,7 +1,7 @@
 #include <vector>
 #include "glad/include/glad/glad.h"
 #include <glm/glm.hpp>
-
+#include "parser.h"
 
 
 using namespace std;
@@ -10,7 +10,7 @@ class Tracer
 {
 public:
     Tracer() = default;
-    void render();
+    void render(sceneDesription scene);
     vector<vector<unsigned char>> *getFinalImage() {return finalImage;}
     glm::vec4 calcPixelColor(glm::vec2 coordinate);
     unsigned char *getImageData() {return imageData;}
