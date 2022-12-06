@@ -8,8 +8,8 @@
 void Tracer::render(sceneDesription scene) {
     imageData = (unsigned char*) malloc(IMG_HEIGHT * IMG_WIDTH * 4);
     
-    vector<sphere> spheres = scene.spheres;
-     (int y = 0; y < IMG_HEIGHT; y++)
+    vector<sphere> *spheres = scene.spheres;
+    for (int y = 0; y < IMG_HEIGHT; y++)
     {
         for (int x = 0; x < IMG_WIDTH; x++)
         {

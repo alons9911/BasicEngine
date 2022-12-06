@@ -117,18 +117,19 @@ static void parseLine(char op, double x1, double x2, double x3, double x4, scene
         scene->colors->push_back(parseColor(x1, x2, x3, x4));
         break;
     default:
-        objectDescriptor obj;
+        //objectDescriptor obj;
         if (x4 > 0)
         {
-            obj = parseSphere(op, x1, x2, x3, x4);
+            sphere obj = parseSphere(op, x1, x2, x3, x4);
             scene->spheres->push_back(obj);
+            orderedObjects->push_back(&obj);
         }
         else
         {
-            obj = parsePlane(op, x1, x2, x3, x4);
+            plane obj = parsePlane(op, x1, x2, x3, x4);
             scene->planes->push_back(obj);
+            orderedObjects->push_back(&obj);
         }
-        orderedObjects->push_back(&obj);
     }
 }
 

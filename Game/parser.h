@@ -166,7 +166,7 @@ struct sceneDesription
 
 
 static sceneDesription parseInputFile(string fileName);
-static void parseLine(char op, double x1, double x2, double x3, double x4, sceneDesription *scene);
+static void parseLine(char op, double x1, double x2, double x3, double x4, sceneDesription *scene, vector<objectDescriptor*> *orderedObjects, int *nextColoredObject);
 eye *parseEye(double x1, double x2, double x3, double x4);
 ambientLight *parseAmbientLight(double x1, double x2, double x3, double x4);
 lightDir parseLightDirection(double x1, double x2, double x3, double x4);
