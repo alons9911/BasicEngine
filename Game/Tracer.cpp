@@ -39,9 +39,17 @@ glm::vec4 Tracer::calcPixelColor(glm::vec2 coor) {
     rayDirection = glm::normalize(rayDirection);
     float raduis = 0.5f;
     glm::vec3 sphereCenter(0.0f);
-    glm::vec3 sphereColor(0, 1, 1);
-    glm::vec3 lightDir(1, 1, 1);
+    glm::vec3 sphereColor(1, 0, 1);
+    glm::vec3 lightDir(-1, -1, 1);
     lightDir = glm::normalize(lightDir);
+
+    //camera directions
+    glm::vec3 upDirection(0.0f, 1.0f, 0.0f);
+    glm::vec3 screenCenter(0.0f);
+    glm::vec3 cameraDirection = rayOrigin - screenCenter;
+    glm::vec3 rightDirection = glm::normalize(glm::cross(cameraDirection, upDirection));
+    glm::vec3 cameraUpDirection = glm::normalize(glm::cross(rightDirection, cameraDirection));
+
 
     // (bx^2 + by^2 + bz^2)t^2 + 2t(axbx + ayby + azbz) + (ax^2 + ay^2 + az^2 - r^2) = 0
     // where
@@ -51,8 +59,8 @@ glm::vec4 Tracer::calcPixelColor(glm::vec2 coor) {
     // t = hit distance
 
     float a = 1.0f; //glm::dot(rayDirection, rayDirection); // = (bx^2 + by^2 + bz^2) by definition 
-    float b = 2.0f * glm::dot(rayOrigin, rayDirection); // = 2(axbx + ayby + azbz) by definition
-    float c = glm::dot(rayOrigin, rayOrigin) - raduis * raduis;
+    float b = 2.0f * glm::dot(rayDirection, rayOrigin - sphereCenter); // = 2(axbx + ayby + azbz) by definition
+    float c = glm::dot(rayOrigin - sphereCenter, rayOrigin - sphereCenter) - raduis * raduis;
 
     //Quadric formula discriminant:
     // b^2 - 4ac
@@ -80,7 +88,6 @@ glm::vec4 Tracer::calcPixelColor(glm::vec2 coor) {
         glm::vec3 normal = hitPosition - sphereCenter;
         normal = glm::normalize(normal);
         float intensity = glm::max(glm::dot(normal, -lightDir), 0.0f);
-        cout << intensity << endl;
         return glm::vec4(intensity * sphereColor, 1.0f);
     }
     return glm::vec4(0, 0, 0, 1);
