@@ -27,13 +27,10 @@ struct color : descriptor
 struct objectDescriptor : descriptor
 {
     objectType type;
-    float R, G, B, A;
+    glm::vec4 objColor;
 
     void setColor(float r, float g, float b, float a) {
-      this->R = r; 
-      this->G = g;
-      this->B = b;
-      this->A = a;
+      this->objColor = glm::vec4(r, g, b, a); 
     }
 };
 
