@@ -2,6 +2,7 @@
 #define PARSER_H
 
 #include <vector>
+#include <glm/glm.hpp>
 
 using namespace std;
 
@@ -100,15 +101,11 @@ struct intensity : descriptor
 struct sphere : objectDescriptor
 {
   sphere(double x, double y, double z, double raduis, objectType type){
-    this->x = x;
-    this->y = y;
-    this->z = z;
+    this->position = glm::vec3(x, y, z);
     this->radius = radius;
     this->type = type;
   };
-  double x;
-  double y;
-  double z;
+  glm::vec3 position;
   double radius;
 };
 
@@ -149,7 +146,8 @@ struct sceneDesription
     this->lightDirs = new vector<lightDir>();
     this->spotlightPositions = new vector<spotlightPosition>();
     this->intensities = new vector<intensity>();
-    this->objects = new vector<objectDescriptor>();
+    this->spheres = new vector<sphere>();
+    this->planes = new vector<plane>();
     this->colors = new vector<color>();
   };
   eye *e;
@@ -157,7 +155,8 @@ struct sceneDesription
   vector<lightDir> *lightDirs;
   vector<spotlightPosition> *spotlightPositions;
   vector<intensity> *intensities;
-  vector<objectDescriptor> *objects;
+  vector<sphere> *spheres;
+  vector<plane> *planes;
   vector<color> *colors;
 
 };

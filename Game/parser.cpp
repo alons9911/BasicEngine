@@ -15,11 +15,20 @@ static void printParsedInput(sceneDesription scene){
     ambientLight light = *scene.light;
     cout << "<light: R=" << light.R << ", G=" << light.G << ", B=" << light.B << ", A=" << light.A  << " >" << endl;
 
-    vector<objectDescriptor> objs = *scene.objects;
-    cout << "<objects: " << endl;
-    for (int i = 0; i < objs.size(); i++)
+    vector<sphere> spheres = *scene.spheres;
+    cout << "<spheres: " << endl;
+    for (int i = 0; i < spheres.size(); i++)
     {
-        objectDescriptor obj = objs.at(i);
+        objectDescriptor obj = spheres.at(i);
+        cout << "    <object: type=" << obj.type << " >" << endl;
+    }
+    cout << ">" << endl;
+
+    vector<plane> planes = *scene.planes;
+    cout << "<planes: " << endl;
+    for (int i = 0; i < planes.size(); i++)
+    {
+        objectDescriptor obj = planes.at(i);
         cout << "    <object: type=" << obj.type << " >" << endl;
     }
     cout << ">" << endl;
@@ -106,11 +115,11 @@ static void parseLine(char op, double x1, double x2, double x3, double x4, scene
     default:
         if (x4 > 0)
         {
-            scene->objects->push_back(parseSphere(op, x1, x2, x3, x4));
+            scene->spheres->push_back(parseSphere(op, x1, x2, x3, x4));
         }
         else
         {
-            scene->objects->push_back(parsePlane(op, x1, x2, x3, x4));
+            scene->planes->push_back(parsePlane(op, x1, x2, x3, x4));
         }
     }
 }
