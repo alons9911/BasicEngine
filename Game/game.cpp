@@ -2,6 +2,7 @@
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
 #include "Tracer.cpp"
+#include "parser.cpp"
 
 static void printMat(const glm::mat4 mat)
 {
