@@ -80,17 +80,19 @@ static sceneDesription parseInputFile(string fileName)
     char op, c;
 
     sceneDesription scene;
+    vector<objectDescriptor*> *orderedObjects = new vector<objectDescriptor*>();
+    int nextColoredObject = 0;
 
     while (infile >> op >> x1 >> x2 >> x3 >> x4)
     {
         // successfully extracted one line, data is in op, x1, ..., x4, c.
         cout << op << "," << x1 << "," << x2 << "," << x3 << "," << x4 << endl;
-        parseLine(op, x1, x2, x3, x4, &scene);
+        parseLine(op, x1, x2, x3, x4, &scene, orderedObjects, &nextColoredObject);
     }
     return scene;
 }
 
-static void parseLine(char op, double x1, double x2, double x3, double x4, sceneDesription *scene)
+static void parseLine(char op, double x1, double x2, double x3, double x4, sceneDesription *scene, vector<objectDescriptor*> *orderedObjects, int *nextColoredObject)
 {
     switch (op)
     {
@@ -110,17 +112,23 @@ static void parseLine(char op, double x1, double x2, double x3, double x4, scene
         scene->intensities->push_back(parseLightIntensity(x1, x2, x3, x4));
         break;
     case 'c':
+        orderedObjects->at(*nextColoredObject)->color = glm::vec4(x1, x2, x3, x4);
+        (*nextColoredObject)++;
         scene->colors->push_back(parseColor(x1, x2, x3, x4));
         break;
     default:
+        objectDescriptor obj;
         if (x4 > 0)
         {
-            scene->spheres->push_back(parseSphere(op, x1, x2, x3, x4));
+            obj = parseSphere(op, x1, x2, x3, x4);
+            scene->spheres->push_back(obj);
         }
         else
         {
-            scene->planes->push_back(parsePlane(op, x1, x2, x3, x4));
+            obj = parsePlane(op, x1, x2, x3, x4);
+            scene->planes->push_back(obj);
         }
+        orderedObjects->push_back(&obj);
     }
 }
 

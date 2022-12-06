@@ -28,8 +28,11 @@ void Game::Init()
 	AddShader("../res/shaders/pickingShader");	
 	AddShader("../res/shaders/basicShader");
 
+	sceneDesription sc = parseInputFile("/home/alon/Desktop/graphics/BasicEngine/Game/scene.txt");
+
+
 	Tracer *tracer = new Tracer();
-	tracer->render();
+	tracer->render(sc);
 	unsigned char *data = tracer->getImageData();
 
 	AddTexture(800, 800, data);

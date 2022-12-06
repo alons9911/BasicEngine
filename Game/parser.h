@@ -13,6 +13,7 @@ struct descriptor{};
 struct objectDescriptor : descriptor
 {
     objectType type;
+    glm::vec4 color = glm::vec4(0.0f);
 };
 
 struct eye : descriptor
