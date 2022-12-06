@@ -4,6 +4,8 @@
 #include <cstring>
 #include <sstream>
 #include <vector>
+#include <glm/glm.hpp>
+
 using namespace std;
 
 static void printParsedInput(sceneDesription scene){
@@ -15,21 +17,21 @@ static void printParsedInput(sceneDesription scene){
     ambientLight light = *scene.light;
     cout << "<light: R=" << light.R << ", G=" << light.G << ", B=" << light.B << ", A=" << light.A  << " >" << endl;
 
-    vector<sphere> spheres = *scene.spheres;
+    vector<sphere*> spheres = *scene.spheres;
     cout << "<spheres: " << endl;
     for (int i = 0; i < spheres.size(); i++)
     {
-        objectDescriptor obj = spheres.at(i);
-        cout << "    <object: type=" << obj.type << " >" << endl;
+        sphere obj = *spheres.at(i);
+        cout << "    <sphere: type=" << obj.type << ", radius="<< obj.radius << ", position=" << obj.position.x << "," << obj.position.y << "," << obj.position.z << ", color="<< obj.R << "," << obj.G << "," << obj.B << "," << obj.A <<" >" << endl;
     }
     cout << ">" << endl;
 
-    vector<plane> planes = *scene.planes;
+    vector<plane*> planes = *scene.planes;
     cout << "<planes: " << endl;
     for (int i = 0; i < planes.size(); i++)
     {
-        objectDescriptor obj = planes.at(i);
-        cout << "    <object: type=" << obj.type << " >" << endl;
+        plane obj = *planes.at(i);
+        cout << "    <plane: type=" << obj.type << ", values=" << obj.a << "," << obj.b << "," << obj.c << "," << obj.d << ", color="<< obj.R << "," << obj.G << "," << obj.B << "," << obj.A <<" >" << endl;
     }
     cout << ">" << endl;
 
@@ -112,23 +114,27 @@ static void parseLine(char op, double x1, double x2, double x3, double x4, scene
         scene->intensities->push_back(parseLightIntensity(x1, x2, x3, x4));
         break;
     case 'c':
-        orderedObjects->at(*nextColoredObject)->color = glm::vec4(x1, x2, x3, x4);
+        cout << "color:" << x1 << "," << x2 << "," << x3 << "," << x4 << endl;
+        orderedObjects->at(*nextColoredObject)->setColor(x1, x2, x3, x4);
         (*nextColoredObject)++;
+        cout << *nextColoredObject << endl;
         scene->colors->push_back(parseColor(x1, x2, x3, x4));
         break;
     default:
         //objectDescriptor obj;
         if (x4 > 0)
         {
-            sphere obj = parseSphere(op, x1, x2, x3, x4);
+            sphere *obj = parseSphere(op, x1, x2, x3, x4);
             scene->spheres->push_back(obj);
-            orderedObjects->push_back(&obj);
+            obj = scene->spheres->at(scene->spheres->size() - 1);
+            orderedObjects->push_back(obj);
         }
         else
         {
-            plane obj = parsePlane(op, x1, x2, x3, x4);
+            plane *obj = parsePlane(op, x1, x2, x3, x4);
             scene->planes->push_back(obj);
-            orderedObjects->push_back(&obj);
+            obj = scene->planes->at(scene->planes->size() - 1);
+            orderedObjects->push_back(obj);
         }
     }
 }
@@ -206,26 +212,16 @@ objectType getType(char c)
     }
 }
 
-sphere parseSphere(char op, double x1, double x2, double x3, double x4)
+sphere *parseSphere(char op, double x1, double x2, double x3, double x4)
 {
     objectType type = getType(op);
-    return sphere{
-        .x = x1,
-        .y = x2,
-        .z = x3,
-        .radius = x4,
-        .type = type
-    };
+    sphere *s = new sphere(x1, x2, x3, 0, type);
+    s->setRaduis(x4);
+    return s;
 }
 
-plane parsePlane(char op, double x1, double x2, double x3, double x4)
+plane *parsePlane(char op, double x1, double x2, double x3, double x4)
 {
     objectType type = getType(op);
-    return plane{
-        .a = x1,
-        .b = x2,
-        .c = x3,
-        .d = x4,
-        .type = type
-    };
+    return new plane(x1, x2, x3, x4, type);
 }

@@ -10,10 +10,31 @@ enum objectType {normal, reflective, transparent};
 
 struct descriptor{};
 
+struct color : descriptor
+{
+  color(double R, double G, double B, double A){
+    this->R = R;
+    this->G = G;
+    this->B = B;
+    this->A = A;
+  };
+  double R;
+  double G;
+  double B;
+  double A;
+};
+
 struct objectDescriptor : descriptor
 {
     objectType type;
-    glm::vec4 color = glm::vec4(0.0f);
+    float R, G, B, A;
+
+    void setColor(float r, float g, float b, float a) {
+      this->R = r; 
+      this->G = g;
+      this->B = b;
+      this->A = a;
+    }
 };
 
 struct eye : descriptor
@@ -106,6 +127,8 @@ struct sphere : objectDescriptor
     this->radius = radius;
     this->type = type;
   };
+
+  void setRaduis(double r){this->radius = r;}
   glm::vec3 position;
   double radius;
 };
@@ -125,20 +148,6 @@ struct plane : objectDescriptor
   double d;
 };
 
-struct color : descriptor
-{
-  color(double R, double G, double B, double A){
-    this->R = R;
-    this->G = G;
-    this->B = B;
-    this->A = A;
-  };
-  double R;
-  double G;
-  double B;
-  double A;
-};
-
 struct sceneDesription
 {
   sceneDesription(){
@@ -147,8 +156,8 @@ struct sceneDesription
     this->lightDirs = new vector<lightDir>();
     this->spotlightPositions = new vector<spotlightPosition>();
     this->intensities = new vector<intensity>();
-    this->spheres = new vector<sphere>();
-    this->planes = new vector<plane>();
+    this->spheres = new vector<sphere*>();
+    this->planes = new vector<plane*>();
     this->colors = new vector<color>();
   };
   eye *e;
@@ -156,8 +165,8 @@ struct sceneDesription
   vector<lightDir> *lightDirs;
   vector<spotlightPosition> *spotlightPositions;
   vector<intensity> *intensities;
-  vector<sphere> *spheres;
-  vector<plane> *planes;
+  vector<sphere*> *spheres;
+  vector<plane*> *planes;
   vector<color> *colors;
 
 };
@@ -173,8 +182,8 @@ lightDir parseLightDirection(double x1, double x2, double x3, double x4);
 spotlightPosition parseSpotlightPosition(double x1, double x2, double x3, double x4);
 intensity parseLightIntensity(double x1, double x2, double x3, double x4);
 color parseColor(double x1, double x2, double x3, double x4);
-sphere parseSphere(char op, double x1, double x2, double x3, double x4);
-plane parsePlane(char op, double x1, double x2, double x3, double x4);
+sphere *parseSphere(char op, double x1, double x2, double x3, double x4);
+plane *parsePlane(char op, double x1, double x2, double x3, double x4);
 
 objectType getType(char c);
 
