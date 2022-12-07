@@ -33,7 +33,7 @@ void Game::Init()
 	printParsedInput(sc);
 
 	Tracer *tracer = new Tracer();
-	tracer->render(sc);
+	tracer->render(&sc);
 	unsigned char *data = tracer->getImageData();
 
 	AddTexture(800, 800, data);

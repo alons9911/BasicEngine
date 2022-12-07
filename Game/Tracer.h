@@ -6,17 +6,35 @@
 
 using namespace std;
 
+
+struct Ray{
+    glm::vec3 origin;
+    glm::vec3 direction;
+};
 class Tracer
 {
 public:
     Tracer() = default;
-    void render(const sceneDesription &scene);
+    void render(sceneDesription *scene);
     vector<vector<unsigned char>> *getFinalImage() {return finalImage;}
-    glm::vec4 calcPixelColor(glm::vec2 coor, const sceneDesription &scene);
     unsigned char *getImageData() {return imageData;}
 
     int const IMG_HEIGHT = 800, IMG_WIDTH = 800;
 private:
+    struct RayInfo{
+        float hitDistance;
+        glm::vec3 worldPosition;
+        glm::vec3 worldNormal;
+        sphere *closestSphere;
+    };
     unsigned char *imageData = nullptr;
     vector<vector<unsigned char>> *finalImage;
+    sceneDesription *scene = nullptr;
+
+
+    glm::vec3 getRayDirection(glm::vec2 boardCoordinate, glm::vec3 origin);
+    RayInfo traceRay(const Ray &ray);
+    RayInfo closestHit(const Ray &ray, sphere *closestSphere, float hitDistance);
+    RayInfo miss(const Ray &ray);
+    glm::vec4 rayGenerator(int x, int y);
 };

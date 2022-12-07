@@ -4,48 +4,52 @@
 #include <ostream>
 #include "parser.h"
 
+void Tracer::render(sceneDesription *scene)
+{
+    this->scene = scene;
 
-void Tracer::render(const sceneDesription &scene) {
-    imageData = (unsigned char*) malloc(IMG_HEIGHT * IMG_WIDTH * 4);
-    
+    imageData = (unsigned char *)malloc(IMG_HEIGHT * IMG_WIDTH * 4);
+
     for (int y = 0; y < IMG_HEIGHT; y++)
     {
         for (int x = 0; x < IMG_WIDTH; x++)
         {
-            glm::vec2 coordinate = {(float)x / (float)IMG_WIDTH, (float)y / (float)IMG_HEIGHT};
+            glm::vec4 c = glm::clamp(rayGenerator(x, y), glm::vec4(0.0f), glm::vec4(1.0f));
+            /*glm::vec2 coordinate = {(float)x / (float)IMG_WIDTH, (float)y / (float)IMG_HEIGHT};
             coordinate = coordinate * 2.0f - 1.0f; // Converting 0 -> 1 to -1 -> 1
-            glm::vec4 c = calcPixelColor(coordinate, scene);
-            c = glm::clamp(c, glm::vec4(0.0f), glm::vec4(1.0f));
+            glm::vec4 c = calcPixel(coordinate, scene);
+            c = glm::clamp(c, glm::vec4(0.0f), glm::vec4(1.0f));*/
             /*if (c.r > 0 || c.g > 0 || c.b > 0)
             {
                 cout << c.r << ", " << c.g << ", " << c.b << ", " << c.a << endl;
             }*/
-            
-            imageData[4 * (x + y * IMG_WIDTH)] = (unsigned char) (c.r * 255.0f);
-            imageData[4 * (x + y * IMG_WIDTH) + 1] = (unsigned char) (c.g * 255.0f);
-            imageData[4 * (x + y * IMG_WIDTH) + 2] = (unsigned char) (c.b * 255.0f);
-            imageData[4 * (x + y * IMG_WIDTH) + 3] = (unsigned char) (c.a * 255.0f);
+
+            imageData[4 * (x + y * IMG_WIDTH)] = (unsigned char)(c.r * 255.0f);
+            imageData[4 * (x + y * IMG_WIDTH) + 1] = (unsigned char)(c.g * 255.0f);
+            imageData[4 * (x + y * IMG_WIDTH) + 2] = (unsigned char)(c.b * 255.0f);
+            imageData[4 * (x + y * IMG_WIDTH) + 3] = (unsigned char)(c.a * 255.0f);
 
             if (c.r > 0 || c.g > 0 || c.b > 0)
             {
-                //cout << (int)imageData[4 * (x + y * IMG_WIDTH)] << ", " << (int)imageData[4 * (x + y * IMG_WIDTH) + 1] << ", " << (int)imageData[4 * (x + y * IMG_WIDTH) + 2] << ", " << (int)imageData[4 * (x + y * IMG_WIDTH) +3] << endl;
+                // cout << (int)imageData[4 * (x + y * IMG_WIDTH)] << ", " << (int)imageData[4 * (x + y * IMG_WIDTH) + 1] << ", " << (int)imageData[4 * (x + y * IMG_WIDTH) + 2] << ", " << (int)imageData[4 * (x + y * IMG_WIDTH) +3] << endl;
             }
-
         }
     }
 }
 
-glm::vec4 Tracer::calcPixelColor(glm::vec2 coor, const sceneDesription &scene) {
-    glm::vec3 rayOrigin = glm::vec3(scene.e->x, scene.e->y, scene.e->z);
+glm::vec3 Tracer::getRayDirection(glm::vec2 boardCoordinate, glm::vec3 origin)
+{
+    float x = boardCoordinate.x, y = boardCoordinate.y;
+    glm::vec2 coordinate = {x / (float)IMG_WIDTH, y / (float)IMG_HEIGHT};
+    coordinate = coordinate * 2.0f - 1.0f; // Converting 0 -> 1 to -1 -> 1s
+    //return glm::normalize(glm::vec3(coordinate, -1.0f));
+    glm::vec3 pixelCoordinate = glm::vec3(coordinate, 0.0f);
+    return glm::normalize(pixelCoordinate - origin);
+}
 
-    
-    vector<sphere*> spheres = *scene.spheres;
-
-    glm::vec3 rayDirection = glm::vec3(coor.x, coor.y, -1.0f);
-    rayDirection = glm::normalize(rayDirection);
-    glm::vec3 lightDir(-1, -1, 1);
-    lightDir = glm::normalize(lightDir);
-
+Tracer::RayInfo Tracer::traceRay(const Ray &ray)
+{
+    vector<sphere*> spheres = *scene->spheres;
     ///////
     /*
     spheres = *(new vector<sphere*>());
@@ -59,15 +63,14 @@ glm::vec4 Tracer::calcPixelColor(glm::vec2 coor, const sceneDesription &scene) {
     spheres.push_back(s1);
     spheres.push_back(s2);
 
-    rayOrigin = glm::vec3(0, 0, 2);
+    //rayOrigin = glm::vec3(0, 0, 2);
     */
     ///////
 
     if (spheres.size() == 0)
-        return glm::vec4(0, 0, 0, 1);
-    
+        return miss(Ray());
 
-    sphere * closestSphere = nullptr;
+    sphere *closestSphere = nullptr;
     float hitDistance = FLT_MAX;
 
     for (sphere *s : spheres)
@@ -79,22 +82,21 @@ glm::vec4 Tracer::calcPixelColor(glm::vec2 coor, const sceneDesription &scene) {
         // b = ray direction
         // r = raduis
         // t = hit distance
-        glm::vec3 origin = rayOrigin - s->position;
+        glm::vec3 origin = ray.origin - s->position;
 
-        float a = 1.0f; //glm::dot(rayDirection, rayDirection); // = (bx^2 + by^2 + bz^2) by definition 
-        float b = 2.0f * glm::dot(origin, rayDirection); // = 2(axbx + ayby + azbz) by definition
+        float a = 1.0f;                                  // glm::dot(rayDirection, rayDirection); // = (bx^2 + by^2 + bz^2) by definition
+        float b = 2.0f * glm::dot(origin, ray.direction); // = 2(axbx + ayby + azbz) by definition
         float c = glm::dot(origin, origin) - s->radius * s->radius;
 
-        //Quadric formula discriminant:
-        // b^2 - 4ac
+        // Quadric formula discriminant:
+        //  b^2 - 4ac
 
         float discriminant = b * b - 4.0f * a * c;
 
         if (discriminant < 0.0f)
             continue;
-
         float closestT = (-b + glm::sqrt(discriminant)) / (2.0f * a);
-        //float t0 = (-b + glm::sqrt(discriminant)) / (2.0f * a);
+        // float t0 = (-b + glm::sqrt(discriminant)) / (2.0f * a);
         if (closestT < hitDistance)
         {
             hitDistance = closestT;
@@ -102,20 +104,53 @@ glm::vec4 Tracer::calcPixelColor(glm::vec2 coor, const sceneDesription &scene) {
         }
     }
     if (closestSphere == nullptr)
-        return glm::vec4(0, 0, 0, 1);
+        return miss(ray);
+    return closestHit(ray, closestSphere, hitDistance);
+}
+
+Tracer::RayInfo Tracer::closestHit(const Ray &ray, sphere *closestSphere, float hitDistance)
+{
+    glm::vec3 origin = ray.origin - closestSphere->position;
+    glm::vec3 hitPosition = origin + ray.direction * hitDistance;
+    glm::vec3 normal = glm::normalize(hitPosition);
+
+    RayInfo result;
+    result.hitDistance = hitDistance;
+    result.closestSphere = closestSphere;
+    result.worldPosition = hitPosition + closestSphere->position;
+    result.worldNormal = normal;
+    return result;
+}
+
+Tracer::RayInfo Tracer::miss(const Ray &ray)
+{
+    Tracer::RayInfo missInfo;
+    missInfo.hitDistance = -1;
+    return missInfo;
+}
+
+glm::vec4 Tracer::rayGenerator(int x, int y)
+{
+    Ray ray;
+    ray.origin = glm::vec3(scene->e->x, scene->e->y, scene->e->z);
+    ray.direction = getRayDirection(glm::vec2(x, y), ray.origin);
+    Tracer::RayInfo traceInfo = traceRay(ray);
+
+    if (traceInfo.hitDistance < 0.0f)
+        return glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+    glm::vec3 lightDir = glm::normalize(glm::vec3(-1, -1, 1));
+    float intensity = glm::max(glm::dot(traceInfo.worldNormal, -lightDir), 0.0f); // == cos(alpha)
     
-    glm::vec3 origin = rayOrigin - closestSphere->position;
-    glm::vec3 hitPosition = origin + rayDirection * hitDistance;
-    glm::vec3 normal = hitPosition;
-    normal = glm::normalize(normal);
-    float intensity = glm::max(glm::dot(normal, -lightDir), 0.0f);
+    sphere *closestSphere = traceInfo.closestSphere;
     glm::vec3 sphereColor = glm::vec3(closestSphere->objColor.r, closestSphere->objColor.g, closestSphere->objColor.b);
-    return glm::vec4(intensity * sphereColor, 1.0f);
-    
-    //camera directions
+    sphereColor *= intensity;
+    return glm::vec4(sphereColor, 1.0f);
+
+    // camera directions
     glm::vec3 upDirection(0.0f, 1.0f, 0.0f);
     glm::vec3 screenCenter(0.0f);
-    glm::vec3 cameraDirection = rayOrigin - screenCenter;
+    glm::vec3 cameraDirection = ray.origin - screenCenter;
     glm::vec3 rightDirection = glm::normalize(glm::cross(cameraDirection, upDirection));
-    glm::vec3 cameraUpDirection = glm::normalize(glm::cross(rightDirection, cameraDirection));   
+    glm::vec3 cameraUpDirection = glm::normalize(glm::cross(rightDirection, cameraDirection));
 }
