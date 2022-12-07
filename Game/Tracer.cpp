@@ -5,17 +5,16 @@
 #include "parser.h"
 
 
-void Tracer::render(sceneDesription scene) {
+void Tracer::render(const sceneDesription &scene) {
     imageData = (unsigned char*) malloc(IMG_HEIGHT * IMG_WIDTH * 4);
     
-    vector<sphere*> *spheres = scene.spheres;
     for (int y = 0; y < IMG_HEIGHT; y++)
     {
         for (int x = 0; x < IMG_WIDTH; x++)
         {
             glm::vec2 coordinate = {(float)x / (float)IMG_WIDTH, (float)y / (float)IMG_HEIGHT};
             coordinate = coordinate * 2.0f - 1.0f; // Converting 0 -> 1 to -1 -> 1
-            glm::vec4 c = calcPixelColor(coordinate);
+            glm::vec4 c = calcPixelColor(coordinate, scene);
             c = glm::clamp(c, glm::vec4(0.0f), glm::vec4(1.0f));
             /*if (c.r > 0 || c.g > 0 || c.b > 0)
             {
@@ -36,63 +35,87 @@ void Tracer::render(sceneDesription scene) {
     }
 }
 
-glm::vec4 Tracer::calcPixelColor(glm::vec2 coor) {
+glm::vec4 Tracer::calcPixelColor(glm::vec2 coor, const sceneDesription &scene) {
+    glm::vec3 rayOrigin = glm::vec3(scene.e->x, scene.e->y, scene.e->z);
+
+    
+    vector<sphere*> spheres = *scene.spheres;
+
     glm::vec3 rayDirection = glm::vec3(coor.x, coor.y, -1.0f);
-    glm::vec3 rayOrigin(0.0f, 0.0f, -1.0f);
     rayDirection = glm::normalize(rayDirection);
-    float raduis = 0.5f;
-    glm::vec3 sphereCenter(0.0f);
-    glm::vec3 sphereColor(1, 0, 1);
     glm::vec3 lightDir(-1, -1, 1);
     lightDir = glm::normalize(lightDir);
 
+    ///////
+    /*
+    spheres = *(new vector<sphere*>());
+    sphere *s1 = new sphere(0,0,0,0.5f,object);
+    s1->setRadius(0.5);
+    s1->setColor(1.0f,0.0f,1.0f, 1.0f);
+
+    sphere *s2 = new sphere(1,0,-5,1.5f,object);
+    s2->setRadius(1.5);
+    s2->setColor(0.2f,0.3f,1.0f, 1.0f);
+    spheres.push_back(s1);
+    spheres.push_back(s2);
+
+    rayOrigin = glm::vec3(0, 0, 2);
+    */
+    ///////
+
+    if (spheres.size() == 0)
+        return glm::vec4(0, 0, 0, 1);
+    
+
+    sphere * closestSphere = nullptr;
+    float hitDistance = FLT_MAX;
+
+    for (sphere *s : spheres)
+    {
+
+        // (bx^2 + by^2 + bz^2)t^2 + 2t(axbx + ayby + azbz) + (ax^2 + ay^2 + az^2 - r^2) = 0
+        // where
+        // a = ray origin
+        // b = ray direction
+        // r = raduis
+        // t = hit distance
+        glm::vec3 origin = rayOrigin - s->position;
+
+        float a = 1.0f; //glm::dot(rayDirection, rayDirection); // = (bx^2 + by^2 + bz^2) by definition 
+        float b = 2.0f * glm::dot(origin, rayDirection); // = 2(axbx + ayby + azbz) by definition
+        float c = glm::dot(origin, origin) - s->radius * s->radius;
+
+        //Quadric formula discriminant:
+        // b^2 - 4ac
+
+        float discriminant = b * b - 4.0f * a * c;
+
+        if (discriminant < 0.0f)
+            continue;
+
+        float closestT = (-b + glm::sqrt(discriminant)) / (2.0f * a);
+        //float t0 = (-b + glm::sqrt(discriminant)) / (2.0f * a);
+        if (closestT < hitDistance)
+        {
+            hitDistance = closestT;
+            closestSphere = s;
+        }
+    }
+    if (closestSphere == nullptr)
+        return glm::vec4(0, 0, 0, 1);
+    
+    glm::vec3 origin = rayOrigin - closestSphere->position;
+    glm::vec3 hitPosition = origin + rayDirection * hitDistance;
+    glm::vec3 normal = hitPosition;
+    normal = glm::normalize(normal);
+    float intensity = glm::max(glm::dot(normal, -lightDir), 0.0f);
+    glm::vec3 sphereColor = glm::vec3(closestSphere->objColor.r, closestSphere->objColor.g, closestSphere->objColor.b);
+    return glm::vec4(intensity * sphereColor, 1.0f);
+    
     //camera directions
     glm::vec3 upDirection(0.0f, 1.0f, 0.0f);
     glm::vec3 screenCenter(0.0f);
     glm::vec3 cameraDirection = rayOrigin - screenCenter;
     glm::vec3 rightDirection = glm::normalize(glm::cross(cameraDirection, upDirection));
-    glm::vec3 cameraUpDirection = glm::normalize(glm::cross(rightDirection, cameraDirection));
-
-
-    // (bx^2 + by^2 + bz^2)t^2 + 2t(axbx + ayby + azbz) + (ax^2 + ay^2 + az^2 - r^2) = 0
-    // where
-    // a = ray origin
-    // b = ray direction
-    // r = raduis
-    // t = hit distance
-
-    float a = 1.0f; //glm::dot(rayDirection, rayDirection); // = (bx^2 + by^2 + bz^2) by definition 
-    float b = 2.0f * glm::dot(rayDirection, rayOrigin - sphereCenter); // = 2(axbx + ayby + azbz) by definition
-    float c = glm::dot(rayOrigin - sphereCenter, rayOrigin - sphereCenter) - raduis * raduis;
-
-    //Quadric formula discriminant:
-    // b^2 - 4ac
-
-    float discriminant = b * b - 4.0f * a * c;
-    //cout << a << "," << b << "," << c << "," << discriminant << endl;
-
-    if (discriminant >= 0){
-        /*float t[] = {
-            -b + sqrt(discriminant) / (2.0f * a),
-            -b - sqrt(discriminant) / (2.0f * a)
-        };*/
-        float t = (-b + glm::sqrt(discriminant)) / (2.0f * a);
-
-        /*for (int i = 0; i < 2; i++)
-        {
-            glm::vec3 hitPosition = rayOrigin + rayDirection * t[i];
-            glm::vec3 normal = hitPosition - sphereCenter;
-            glm::normalize(normal);
-
-            float intensity = max(glm::dot(normal, -lightDir), 0.0f);
-            return intensity * sphereColor;
-        }*/
-        glm::vec3 hitPosition = rayOrigin + rayDirection * t;
-        glm::vec3 normal = hitPosition - sphereCenter;
-        normal = glm::normalize(normal);
-        float intensity = glm::max(glm::dot(normal, -lightDir), 0.0f);
-        return glm::vec4(intensity * sphereColor, 1.0f);
-    }
-    return glm::vec4(0, 0, 0, 1);
-    
+    glm::vec3 cameraUpDirection = glm::normalize(glm::cross(rightDirection, cameraDirection));   
 }

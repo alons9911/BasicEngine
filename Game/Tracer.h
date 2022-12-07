@@ -10,9 +10,9 @@ class Tracer
 {
 public:
     Tracer() = default;
-    void render(sceneDesription scene);
+    void render(const sceneDesription &scene);
     vector<vector<unsigned char>> *getFinalImage() {return finalImage;}
-    glm::vec4 calcPixelColor(glm::vec2 coordinate);
+    glm::vec4 calcPixelColor(glm::vec2 coor, const sceneDesription &scene);
     unsigned char *getImageData() {return imageData;}
 
     int const IMG_HEIGHT = 800, IMG_WIDTH = 800;

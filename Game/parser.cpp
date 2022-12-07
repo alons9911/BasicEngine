@@ -206,7 +206,7 @@ objectType getType(char c)
     case 't':
         return transparent;
     default:
-        return normal;
+        return object;
     }
 }
 
@@ -214,7 +214,7 @@ sphere *parseSphere(char op, double x1, double x2, double x3, double x4)
 {
     objectType type = getType(op);
     sphere *s = new sphere(x1, x2, x3, 0, type);
-    s->setRaduis(x4);
+    s->setRadius(x4);
     return s;
 }
 

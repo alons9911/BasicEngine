@@ -6,7 +6,7 @@
 
 using namespace std;
 
-enum objectType {normal, reflective, transparent};
+enum objectType {object, reflective, transparent};
 
 struct descriptor{};
 
@@ -125,7 +125,7 @@ struct sphere : objectDescriptor
     this->type = type;
   };
 
-  void setRaduis(double r){this->radius = r;}
+  void setRadius(double r){this->radius = r;}
   glm::vec3 position;
   double radius;
 };
