@@ -51,7 +51,7 @@ Tracer::RayInfo Tracer::traceRay(const Ray &ray)
 {
     vector<sphere*> spheres = *scene->spheres;
     ///////
-    /*
+    
     spheres = *(new vector<sphere*>());
     sphere *s1 = new sphere(0,0,0,0.5f,object);
     s1->setRadius(0.5);
@@ -64,7 +64,7 @@ Tracer::RayInfo Tracer::traceRay(const Ray &ray)
     spheres.push_back(s2);
 
     //rayOrigin = glm::vec3(0, 0, 2);
-    */
+    
     ///////
 
     if (spheres.size() == 0)
@@ -95,9 +95,9 @@ Tracer::RayInfo Tracer::traceRay(const Ray &ray)
 
         if (discriminant < 0.0f)
             continue;
-        float closestT = (-b + glm::sqrt(discriminant)) / (2.0f * a);
+        float closestT = (-b - glm::sqrt(discriminant)) / (2.0f * a);
         // float t0 = (-b + glm::sqrt(discriminant)) / (2.0f * a);
-        if (closestT < hitDistance)
+        if (0 < closestT < hitDistance)
         {
             hitDistance = closestT;
             closestSphere = s;
@@ -134,18 +134,32 @@ glm::vec4 Tracer::rayGenerator(int x, int y)
     Ray ray;
     ray.origin = glm::vec3(scene->e->x, scene->e->y, scene->e->z);
     ray.direction = getRayDirection(glm::vec2(x, y), ray.origin);
-    Tracer::RayInfo traceInfo = traceRay(ray);
-
-    if (traceInfo.hitDistance < 0.0f)
-        return glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-
-    glm::vec3 lightDir = glm::normalize(glm::vec3(-1, -1, 1));
-    float intensity = glm::max(glm::dot(traceInfo.worldNormal, -lightDir), 0.0f); // == cos(alpha)
     
-    sphere *closestSphere = traceInfo.closestSphere;
-    glm::vec3 sphereColor = glm::vec3(closestSphere->objColor.r, closestSphere->objColor.g, closestSphere->objColor.b);
-    sphereColor *= intensity;
-    return glm::vec4(sphereColor, 1.0f);
+    glm::vec3 finalColor(0.0f);
+    int reflections = 2;
+    float multiplier = 1.0f;
+    for (int i = 0; i < reflections; i++)
+    {
+        Tracer::RayInfo traceInfo = traceRay(ray);
+
+        if (traceInfo.hitDistance < 0.0f){
+            glm::vec3 backgroundColor = glm::vec3(0.0f, 0.0f, 0.0f);
+            finalColor +=  backgroundColor * multiplier;
+            break;
+        }
+        glm::vec3 lightDir = glm::normalize(glm::vec3(-1, -1, -1));
+        float intensity = glm::max(glm::dot(traceInfo.worldNormal, -lightDir), 0.0f); // == cos(alpha)
+        
+        sphere *closestSphere = traceInfo.closestSphere;
+        glm::vec3 sphereColor = glm::vec3(closestSphere->objColor.r, closestSphere->objColor.g, closestSphere->objColor.b);
+        sphereColor *= intensity;
+        finalColor += sphereColor * multiplier;
+        multiplier *= 0.7f;
+
+        ray.origin = traceInfo.worldPosition + traceInfo.worldNormal * 0.0001f;
+        ray.direction = glm::reflect(ray.direction, traceInfo.worldNormal);
+    }    
+    return glm::vec4(finalColor, 1.0f);
 
     // camera directions
     glm::vec3 upDirection(0.0f, 1.0f, 0.0f);
