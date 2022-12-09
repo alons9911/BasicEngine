@@ -53,22 +53,28 @@ Tracer::RayInfo Tracer::traceRay(const Ray &ray)
     ///////
     
     spheres = *(new vector<sphere*>());
-    sphere *s1 = new sphere(0,0.0,0,0.5f,object);
+    sphere *s1 = new sphere(0,-0.5,0,0.5f,object);
     s1->setRadius(0.5);
     s1->setColor(1.0f,0.0f,1.0f, 1.0f);
 
-    sphere *s2 = new sphere(1,0,-5,1.5f,object);
-    s2->setRadius(1.5);
+    sphere *s2 = new sphere(0,1,0,1.5f,object);
+    s2->setRadius(1);
     s2->setColor(0.2f,0.3f,1.0f, 1.0f);
     spheres.push_back(s1);
     spheres.push_back(s2);
-
+    
     //rayOrigin = glm::vec3(0, 0, 2);
     
     ///////
 
     sphere *closestSphere = nullptr;
     float hitDistance = FLT_MAX;
+    
+    if (ray.direction.x == 0 && ray.direction.y == 0)
+    {
+        cout << "here" << endl;
+    }
+    
 
     for (sphere *s : spheres)
     {
@@ -101,10 +107,19 @@ Tracer::RayInfo Tracer::traceRay(const Ray &ray)
         
         
         // float t0 = (-b + glm::sqrt(discriminant)) / (2.0f * a);
-        if (0 < closestT < hitDistance)
+        if (0 < closestT  && closestT < hitDistance)
         {
             hitDistance = closestT;
             closestSphere = s;
+            if (ray.direction.x == 0 && ray.direction.y == 0 && s->radius != 0.5)
+            {
+                cout << s->radius;
+            }
+            if (ray.direction.x == 0 && ray.direction.y == 0 && s->radius == 0.5)
+            {
+                cout << s->radius;
+            }
+            
         }
     }
     if (closestSphere == nullptr)
