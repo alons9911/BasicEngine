@@ -53,7 +53,7 @@ Tracer::RayInfo Tracer::traceRay(const Ray &ray)
     ///////
     
     spheres = *(new vector<sphere*>());
-    sphere *s1 = new sphere(0,0,0,0.5f,object);
+    sphere *s1 = new sphere(0,0.0,0,0.5f,object);
     s1->setRadius(0.5);
     s1->setColor(1.0f,0.0f,1.0f, 1.0f);
 
@@ -66,9 +66,6 @@ Tracer::RayInfo Tracer::traceRay(const Ray &ray)
     //rayOrigin = glm::vec3(0, 0, 2);
     
     ///////
-
-    if (spheres.size() == 0)
-        return miss(Ray());
 
     sphere *closestSphere = nullptr;
     float hitDistance = FLT_MAX;
@@ -95,7 +92,14 @@ Tracer::RayInfo Tracer::traceRay(const Ray &ray)
 
         if (discriminant < 0.0f)
             continue;
-        float closestT = (-b - glm::sqrt(discriminant)) / (2.0f * a);
+        float t0 = (-b - glm::sqrt(discriminant)) / (2.0f * a), t1 = (-b + glm::sqrt(discriminant)) / (2.0f * a);
+        float closestT = -1;
+        if (t0 < 0 & t1 > 0)
+            closestT = t1;
+        else if (t0 > 0 && t1 > 0)
+            closestT = glm::min(t0, t1);
+        
+        
         // float t0 = (-b + glm::sqrt(discriminant)) / (2.0f * a);
         if (0 < closestT < hitDistance)
         {
@@ -132,11 +136,12 @@ Tracer::RayInfo Tracer::miss(const Ray &ray)
 glm::vec4 Tracer::rayGenerator(int x, int y)
 {
     Ray ray;
-    ray.origin = glm::vec3(scene->e->x, scene->e->y, scene->e->z);
+    //ray.origin = glm::vec3(scene->e->x, scene->e->y, scene->e->z);
+    ray.origin = glm::vec3(0,0,2);
     ray.direction = getRayDirection(glm::vec2(x, y), ray.origin);
     
     glm::vec3 finalColor(0.0f);
-    int reflections = 2;
+    int reflections = 5;
     float multiplier = 1.0f;
     for (int i = 0; i < reflections; i++)
     {
@@ -147,7 +152,7 @@ glm::vec4 Tracer::rayGenerator(int x, int y)
             finalColor +=  backgroundColor * multiplier;
             break;
         }
-        glm::vec3 lightDir = glm::normalize(glm::vec3(-1, -1, -1));
+        glm::vec3 lightDir = glm::normalize(glm::vec3(0.0f, 0.0f, -1.0f));
         float intensity = glm::max(glm::dot(traceInfo.worldNormal, -lightDir), 0.0f); // == cos(alpha)
         
         sphere *closestSphere = traceInfo.closestSphere;
