@@ -40,9 +40,29 @@ void Tracer::render(sceneDesription *scene)
 glm::vec3 Tracer::getRayDirection(glm::vec2 boardCoordinate, glm::vec3 origin)
 {
     float x = boardCoordinate.x, y = boardCoordinate.y;
+
+    // camera directions
+    glm::vec3 upDirection(0.0f, 1.0f, 0.0f);
+    glm::vec3 screenCenter(0.0f);
+    glm::vec3 cameraDirection = screenCenter - origin;
+    glm::vec3 rightDirection = glm::cross(glm::normalize(cameraDirection), upDirection);
+    glm::vec3 cameraUpDirection = glm::cross(glm::normalize(rightDirection), glm::normalize(cameraDirection));
+
+    
+
+
+    float Rx = 2.0f / IMG_WIDTH, Ry = 2.0f / IMG_HEIGHT; 
+
+    glm::vec3 p = screenCenter + ((x - (IMG_WIDTH / 2)) * Rx * rightDirection) - ((y - (IMG_HEIGHT / 2)) * Ry * cameraUpDirection) + cameraDirection;
+    //p = p * 2.0f - 1.0f;
+    return glm::normalize(p);
+    
     glm::vec2 coordinate = {x / (float)IMG_WIDTH, y / (float)IMG_HEIGHT};
     coordinate = coordinate * 2.0f - 1.0f; // Converting 0 -> 1 to -1 -> 1s
     //return glm::normalize(glm::vec3(coordinate, -1.0f));
+
+
+
     glm::vec3 pixelCoordinate = glm::vec3(coordinate, 0.0f);
     return glm::normalize(pixelCoordinate - origin);
 }
@@ -51,30 +71,23 @@ Tracer::RayInfo Tracer::traceRay(const Ray &ray)
 {
     vector<sphere*> spheres = *scene->spheres;
     ///////
-    
+    /*
     spheres = *(new vector<sphere*>());
-    sphere *s1 = new sphere(0,-0.5,0,0.5f,object);
-    s1->setRadius(0.5);
+    sphere *s1 = new sphere(0,0,0,0.5f,object);
+    s1->setRadius(1);
     s1->setColor(1.0f,0.0f,1.0f, 1.0f);
 
-    sphere *s2 = new sphere(0,1,0,1.5f,object);
-    s2->setRadius(1);
+    sphere *s2 = new sphere(0,101,0,1.5f,object);
+    s2->setRadius(100);
     s2->setColor(0.2f,0.3f,1.0f, 1.0f);
     spheres.push_back(s1);
     spheres.push_back(s2);
-    
+    */
     //rayOrigin = glm::vec3(0, 0, 2);
-    
     ///////
 
     sphere *closestSphere = nullptr;
     float hitDistance = FLT_MAX;
-    
-    if (ray.direction.x == 0 && ray.direction.y == 0)
-    {
-        cout << "here" << endl;
-    }
-    
 
     for (sphere *s : spheres)
     {
@@ -111,15 +124,6 @@ Tracer::RayInfo Tracer::traceRay(const Ray &ray)
         {
             hitDistance = closestT;
             closestSphere = s;
-            if (ray.direction.x == 0 && ray.direction.y == 0 && s->radius != 0.5)
-            {
-                cout << s->radius;
-            }
-            if (ray.direction.x == 0 && ray.direction.y == 0 && s->radius == 0.5)
-            {
-                cout << s->radius;
-            }
-            
         }
     }
     if (closestSphere == nullptr)
@@ -151,8 +155,8 @@ Tracer::RayInfo Tracer::miss(const Ray &ray)
 glm::vec4 Tracer::rayGenerator(int x, int y)
 {
     Ray ray;
-    //ray.origin = glm::vec3(scene->e->x, scene->e->y, scene->e->z);
-    ray.origin = glm::vec3(0,0,2);
+    ray.origin = glm::vec3(scene->e->x, scene->e->y, scene->e->z);
+    //ray.origin = glm::vec3(0,0,10);
     ray.direction = getRayDirection(glm::vec2(x, y), ray.origin);
     
     glm::vec3 finalColor(0.0f);
@@ -180,11 +184,4 @@ glm::vec4 Tracer::rayGenerator(int x, int y)
         ray.direction = glm::reflect(ray.direction, traceInfo.worldNormal);
     }    
     return glm::vec4(finalColor, 1.0f);
-
-    // camera directions
-    glm::vec3 upDirection(0.0f, 1.0f, 0.0f);
-    glm::vec3 screenCenter(0.0f);
-    glm::vec3 cameraDirection = ray.origin - screenCenter;
-    glm::vec3 rightDirection = glm::normalize(glm::cross(cameraDirection, upDirection));
-    glm::vec3 cameraUpDirection = glm::normalize(glm::cross(rightDirection, cameraDirection));
 }
