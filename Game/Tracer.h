@@ -37,4 +37,5 @@ private:
     RayInfo closestHit(const Ray &ray, Sphere *closestSphere, float hitDistance);
     RayInfo miss(const Ray &ray);
     glm::vec4 rayGenerator(int x, int y);
+    glm::vec3 innerRayGenerator(const Ray &ray, glm::vec3 color, int reflections, float multiplier, glm::vec3 backgroundColor);
 };
