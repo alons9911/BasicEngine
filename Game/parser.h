@@ -6,27 +6,17 @@
 
 using namespace std;
 
-enum objectType {object, reflective, transparent};
+enum ObjectType {object, reflective, transparent};
+enum LightType {Directional, Spotlight};
 
-struct descriptor{};
 
-struct color : descriptor
+struct Descriptor
 {
-  color(double R, double G, double B, double A){
-    this->R = R;
-    this->G = G;
-    this->B = B;
-    this->A = A;
-  };
-  double R;
-  double G;
-  double B;
-  double A;
 };
 
-struct objectDescriptor : descriptor
+struct ObjectDescriptor : Descriptor
 {
-    objectType type;
+    ObjectType type;
     glm::vec4 objColor;
 
     void setColor(float r, float g, float b, float a) {
@@ -34,15 +24,15 @@ struct objectDescriptor : descriptor
     }
 };
 
-struct eye : descriptor
+struct Eye : Descriptor
 {
-  eye(double x, double y, double z, double additional){
+  Eye(double x, double y, double z, double additional){
     this->x = x;
     this->y = y;
     this->z = z;
     this->additional = additional;
   };
-  eye(){
+  Eye(){
     this->x = 0;
     this->y = 0;
     this->z = 0;
@@ -55,71 +45,47 @@ struct eye : descriptor
   double additional;
 };
 
-struct ambientLight : descriptor
+struct Light : Descriptor
 {
-  ambientLight(double R, double G, double B, double A){
-    this->R = R;
-    this->G = G;
-    this->B = B;
-    this->A = A;
-  };
-  ambientLight(){
-    this->R = 0;
-    this->G = 0;
-    this->B = 0;
-    this->A = 0;
-  };
-  double R;
-  double G;
-  double B;
-  double A;
+  glm::vec3 direction;
+  glm::vec4 intensity;
+  LightType type;
+
+  void setDirection(float x, float y, float z) {
+      this->direction = glm::vec3(x, y, z); 
+  }
+
+  void setIntensity(float r, float g, float b, float a) {
+      this->intensity = glm::vec4(r, g, b, a); 
+  }
 };
 
-struct lightDir : descriptor
+struct DirectionalLight : Light
 {
-  lightDir(double x, double y, double z, bool isSpotlight){
-    this->x = x;
-    this->y = y;
-    this->z = z;
-    this->isSpotlight = isSpotlight;
-  };
-  double x;
-  double y;
-  double z;
-  bool isSpotlight;
+  DirectionalLight(){
+    this->type = Directional;
+  }
 };
 
-struct spotlightPosition : descriptor
+struct SpotLight : Light
 {
-  spotlightPosition(double x, double y, double z, double w){
-    this->x = x;
-    this->y = y;
-    this->z = z;
+  SpotLight(){
+    this->type = Spotlight;
+  }
+  glm::vec3 position;
+  float w;
+
+  void setPosition(float x, float y, float z) {
+      this->position = glm::vec3(x, y, z);
+  }
+  void setAngle(float w){
     this->w = w;
-  };
-  double x;
-  double y;
-  double z;
-  double w;
+  }
 };
 
-struct intensity : descriptor
+struct Sphere : ObjectDescriptor
 {
-  intensity(double R, double G, double B, double A){
-    this->R = R;
-    this->G = G;
-    this->B = B;
-    this->A = A;
-  };
-  double R;
-  double G;
-  double B;
-  double A;
-};
-
-struct sphere : objectDescriptor
-{
-  sphere(double x, double y, double z, double raduis, objectType type){
+  Sphere(double x, double y, double z, double raduis, ObjectType type){
     this->position = glm::vec3(x, y, z);
     this->radius = radius;
     this->type = type;
@@ -130,9 +96,9 @@ struct sphere : objectDescriptor
   double radius;
 };
 
-struct plane : objectDescriptor
+struct Plane : ObjectDescriptor
 {
-  plane(double a, double b, double c, double d, objectType type){
+  Plane(double a, double b, double c, double d, ObjectType type){
     this->a = a;
     this->b = b;
     this->c = c;
@@ -145,43 +111,35 @@ struct plane : objectDescriptor
   double d;
 };
 
-struct sceneDesription
+struct SceneDesription
 {
-  sceneDesription(){
-    this->e = new eye();
-    this->light = new ambientLight();
-    this->lightDirs = new vector<lightDir>();
-    this->spotlightPositions = new vector<spotlightPosition>();
-    this->intensities = new vector<intensity>();
-    this->spheres = new vector<sphere*>();
-    this->planes = new vector<plane*>();
-    this->colors = new vector<color>();
+  SceneDesription(){
+    this->eye = new Eye();
+    this->ambientLight = new glm::vec4(0.0f);
+    this->lights = new vector<Light*>();
+    this->spotlights = new vector<SpotLight*>();
+    this->spheres = new vector<Sphere*>();
+    this->planes = new vector<Plane*>();
   };
-  eye *e;
-  ambientLight *light;
-  vector<lightDir> *lightDirs;
-  vector<spotlightPosition> *spotlightPositions;
-  vector<intensity> *intensities;
-  vector<sphere*> *spheres;
-  vector<plane*> *planes;
-  vector<color> *colors;
-
+  Eye *eye;
+  glm::vec4 *ambientLight;
+  vector<Light*> *lights;
+  vector<SpotLight*> *spotlights;
+  vector<Sphere*> *spheres;
+  vector<Plane*> *planes;
 };
 
 
 
 
-static sceneDesription parseInputFile(string fileName);
-static void parseLine(char op, double x1, double x2, double x3, double x4, sceneDesription *scene, vector<objectDescriptor*> *orderedObjects, int *nextColoredObject);
-eye *parseEye(double x1, double x2, double x3, double x4);
-ambientLight *parseAmbientLight(double x1, double x2, double x3, double x4);
-lightDir parseLightDirection(double x1, double x2, double x3, double x4);
-spotlightPosition parseSpotlightPosition(double x1, double x2, double x3, double x4);
-intensity parseLightIntensity(double x1, double x2, double x3, double x4);
-color parseColor(double x1, double x2, double x3, double x4);
-sphere *parseSphere(char op, double x1, double x2, double x3, double x4);
-plane *parsePlane(char op, double x1, double x2, double x3, double x4);
+static SceneDesription parseInputFile(string fileName);
+static void parseLine(char op, double x1, double x2, double x3, double x4, SceneDesription *scene, vector<ObjectDescriptor*> *orderedObjects, int *nextColoredObject, int *nextSpotlightPosition, int *nextIntensityPosition);
+Eye *parseEye(double x1, double x2, double x3, double x4);
+glm::vec4 *parseAmbientLight(double x1, double x2, double x3, double x4);
+Light *parseLightDirection(double x1, double x2, double x3, double x4);
+Sphere *parseSphere(char op, double x1, double x2, double x3, double x4);
+Plane *parsePlane(char op, double x1, double x2, double x3, double x4);
 
-objectType getType(char c);
+ObjectType getType(char c);
 
 #endif

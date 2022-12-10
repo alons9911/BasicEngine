@@ -4,7 +4,7 @@
 #include <ostream>
 #include "parser.h"
 
-void Tracer::render(sceneDesription *scene)
+void Tracer::render(SceneDesription *scene)
 {
     this->scene = scene;
 
@@ -69,16 +69,16 @@ glm::vec3 Tracer::getRayDirection(glm::vec2 boardCoordinate, glm::vec3 origin)
 
 Tracer::RayInfo Tracer::traceRay(const Ray &ray)
 {
-    vector<sphere*> spheres = *scene->spheres;
+    vector<Sphere*> spheres = *scene->spheres;
     ///////
     /*
-    spheres = *(new vector<sphere*>());
-    sphere *s1 = new sphere(0,0,0,0.5f,object);
+    spheres = *(new vector<Sphere*>());
+    Sphere *s1 = new Sphere(0,0,-20,0.5f,object);
     s1->setRadius(1);
     s1->setColor(1.0f,0.0f,1.0f, 1.0f);
 
-    sphere *s2 = new sphere(0,101,0,1.5f,object);
-    s2->setRadius(100);
+    Sphere *s2 = new Sphere(0,-51,-20,1.5f,object);
+    s2->setRadius(50);
     s2->setColor(0.2f,0.3f,1.0f, 1.0f);
     spheres.push_back(s1);
     spheres.push_back(s2);
@@ -86,10 +86,10 @@ Tracer::RayInfo Tracer::traceRay(const Ray &ray)
     //rayOrigin = glm::vec3(0, 0, 2);
     ///////
 
-    sphere *closestSphere = nullptr;
+    Sphere *closestSphere = nullptr;
     float hitDistance = FLT_MAX;
 
-    for (sphere *s : spheres)
+    for (Sphere *s : spheres)
     {
 
         // (bx^2 + by^2 + bz^2)t^2 + 2t(axbx + ayby + azbz) + (ax^2 + ay^2 + az^2 - r^2) = 0
@@ -131,7 +131,7 @@ Tracer::RayInfo Tracer::traceRay(const Ray &ray)
     return closestHit(ray, closestSphere, hitDistance);
 }
 
-Tracer::RayInfo Tracer::closestHit(const Ray &ray, sphere *closestSphere, float hitDistance)
+Tracer::RayInfo Tracer::closestHit(const Ray &ray, Sphere *closestSphere, float hitDistance)
 {
     glm::vec3 origin = ray.origin - closestSphere->position;
     glm::vec3 hitPosition = origin + ray.direction * hitDistance;
@@ -155,12 +155,12 @@ Tracer::RayInfo Tracer::miss(const Ray &ray)
 glm::vec4 Tracer::rayGenerator(int x, int y)
 {
     Ray ray;
-    ray.origin = glm::vec3(scene->e->x, scene->e->y, scene->e->z);
+    ray.origin = glm::vec3(scene->eye->x, scene->eye->y, scene->eye->z);
     //ray.origin = glm::vec3(0,0,10);
     ray.direction = getRayDirection(glm::vec2(x, y), ray.origin);
     
     glm::vec3 finalColor(0.0f);
-    int reflections = 5;
+    int reflections = 1;
     float multiplier = 1.0f;
     for (int i = 0; i < reflections; i++)
     {
@@ -174,7 +174,7 @@ glm::vec4 Tracer::rayGenerator(int x, int y)
         glm::vec3 lightDir = glm::normalize(glm::vec3(0.0f, 0.0f, -1.0f));
         float intensity = glm::max(glm::dot(traceInfo.worldNormal, -lightDir), 0.0f); // == cos(alpha)
         
-        sphere *closestSphere = traceInfo.closestSphere;
+        Sphere *closestSphere = traceInfo.closestSphere;
         glm::vec3 sphereColor = glm::vec3(closestSphere->objColor.r, closestSphere->objColor.g, closestSphere->objColor.b);
         sphereColor *= intensity;
         finalColor += sphereColor * multiplier;

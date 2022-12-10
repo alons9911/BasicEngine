@@ -8,128 +8,117 @@
 
 using namespace std;
 
-static void printParsedInput(sceneDesription scene){
+static void printParsedInput(SceneDesription scene){
     cout << "----- configuration ----" << endl;
 
-    eye e = *scene.e;
-    cout << "<eye: x=" << e.x << ", y=" << e.y << ", z=" << e.z << ", additional=" << e.additional  << " >" << endl;
+    Eye eye = *scene.eye;
+    cout << "<eye: x=" << eye.x << ", y=" << eye.y << ", z=" << eye.z << ", additional=" << eye.additional  << " >" << endl;
 
-    ambientLight light = *scene.light;
-    cout << "<light: R=" << light.R << ", G=" << light.G << ", B=" << light.B << ", A=" << light.A  << " >" << endl;
+    glm::vec4 ambientLight = *scene.ambientLight;
+    cout << "<ambientLight: R=" << ambientLight.r << ", G=" << ambientLight.g << ", B=" << ambientLight.b << ", A=" << ambientLight.a  << " >" << endl;
 
-    vector<sphere*> spheres = *scene.spheres;
+    vector<Sphere*> spheres = *scene.spheres;
     cout << "<spheres: " << endl;
     for (int i = 0; i < spheres.size(); i++)
     {
-        sphere obj = *spheres.at(i);
-        cout << "    <sphere: type=" << obj.type << ", radius="<< obj.radius << ", position=" << obj.position.x << "," << obj.position.y << "," << obj.position.z << ", color="<< obj.objColor.r << "," << obj.objColor.g << "," << obj.objColor.b << "," << obj.objColor.a <<" >" << endl;
+        Sphere obj = *spheres.at(i);
+        cout << "    <Sphere: type=" << obj.type << ", radius="<< obj.radius << ", position=" << obj.position.x << "," << obj.position.y << "," << obj.position.z << ", color="<< obj.objColor.r << "," << obj.objColor.g << "," << obj.objColor.b << "," << obj.objColor.a <<" >" << endl;
     }
     cout << ">" << endl;
 
-    vector<plane*> planes = *scene.planes;
+    vector<Plane*> planes = *scene.planes;
     cout << "<planes: " << endl;
     for (int i = 0; i < planes.size(); i++)
     {
-        plane obj = *planes.at(i);
-        cout << "    <plane: type=" << obj.type << ", values=" << obj.a << "," << obj.b << "," << obj.c << "," << obj.d << ", color="<< obj.objColor.r << "," << obj.objColor.g << "," << obj.objColor.b << "," << obj.objColor.a <<" >" << endl;
+        Plane obj = *planes.at(i);
+        cout << "    <Plane: type=" << obj.type << ", values=" << obj.a << "," << obj.b << "," << obj.c << "," << obj.d << ", color="<< obj.objColor.r << "," << obj.objColor.g << "," << obj.objColor.b << "," << obj.objColor.a <<" >" << endl;
     }
     cout << ">" << endl;
 
-    vector<color> colors = *scene.colors;
-    cout << "<colors: " << endl;
-    for (int i = 0; i < colors.size(); i++)
+    vector<Light*> lights = *scene.lights;
+    cout << "<lights: " << endl;
+    for (int i = 0; i < lights.size(); i++)
     {
-        color c = colors.at(i);
-        cout << "    <color: R=" << c.R << ", G=" << c.G << ", B=" << c.B << ", A=" << c.A  << " >" << endl;
+        Light l = *lights.at(i);
+        cout << "    <Light: type=" << l.type << ", direction=" << l.direction.x << "," << l.direction.y << "," << l.direction.z << ", intensity="<< l.intensity.r << "," << l.intensity.g << "," << l.intensity.b << "," << l.intensity.a <<" >" << endl;
     }
     cout << ">" << endl;
 
-    vector<lightDir> dirs = *scene.lightDirs;
-    cout << "<lightDirs: " << endl;
-    for (int i = 0; i < dirs.size(); i++)
+    vector<SpotLight*> spotlights = *scene.spotlights;
+    cout << "<spotlights: " << endl;
+    for (int i = 0; i < spotlights.size(); i++)
     {
-        lightDir dir = dirs.at(i);
-        cout << "    <lightDir: x=" << dir.x << ", y=" << dir.y << ", z=" << dir.z << ", isSpotlight=" << dir.isSpotlight  << " >" << endl;
-    }
-    cout << ">" << endl;
-
-    vector<spotlightPosition> positions = *scene.spotlightPositions;
-    cout << "<positions: " << endl;
-    for (int i = 0; i < positions.size(); i++)
-    {
-        spotlightPosition pos = positions.at(i);
-        cout << "    <spotlightPosition: x=" << pos.x << ", y=" << pos.y << ", z=" << pos.z << ", w=" << pos.w  << " >" << endl;
-    }
-    cout << ">" << endl;
-
-    vector<intensity> intens = *scene.intensities;
-    cout << "<positions: " << endl;
-    for (int i = 0; i < intens.size(); i++)
-    {
-        intensity in = intens.at(i);
-        cout << "    <intensity: R=" << in.R << ", G=" << in.G << ", B=" << in.B << ", A=" << in.A  << " >" << endl;
+        SpotLight l = *spotlights.at(i);
+        cout << "    <spotlights: direction=" << l.direction.x << "," << l.direction.y << "," << l.direction.z << ", intensity="<< l.intensity.r << "," << l.intensity.g << "," << l.intensity.b << "," << l.intensity.a << ", position="<< l.position.x << "," << l.position.y << "," << l.position.z << ", w="<< l.w << " >" << endl;
     }
     cout << ">" << endl;
 }
 
-static sceneDesription parseInputFile(string fileName)
+static SceneDesription parseInputFile(string fileName)
 {
     ifstream infile(fileName);
     string brain_file;
 
-    int n1, n2;
     double x1, x2, x3, x4;
     char op, c;
 
-    sceneDesription scene;
-    vector<objectDescriptor*> *orderedObjects = new vector<objectDescriptor*>();
-    int nextColoredObject = 0;
+    SceneDesription scene;
+    vector<ObjectDescriptor*> *orderedObjects = new vector<ObjectDescriptor*>();
+    int nextColoredObject = 0, nextSpotlightPosition = 0, nextIntensityPosition = 0;
 
     while (infile >> op >> x1 >> x2 >> x3 >> x4)
     {
         // successfully extracted one line, data is in op, x1, ..., x4, c.
         cout << op << "," << x1 << "," << x2 << "," << x3 << "," << x4 << endl;
-        parseLine(op, x1, x2, x3, x4, &scene, orderedObjects, &nextColoredObject);
+        parseLine(op, x1, x2, x3, x4, &scene, orderedObjects, &nextColoredObject, &nextSpotlightPosition, &nextIntensityPosition);
     }
     return scene;
 }
 
-static void parseLine(char op, double x1, double x2, double x3, double x4, sceneDesription *scene, vector<objectDescriptor*> *orderedObjects, int *nextColoredObject)
+static void parseLine(char op, double x1, double x2, double x3, double x4, SceneDesription *scene, 
+vector<ObjectDescriptor*> *orderedObjects, int *nextColoredObject, int *nextSpotlightPosition, int *nextIntensityPosition)
 {
+    Light *light = nullptr; // For 'd' case
+
     switch (op)
     {
     case 'e':
-        scene->e = parseEye(x1, x2, x3, x4);
+        scene->eye = parseEye(x1, x2, x3, x4);
         break;
     case 'a':
-        scene->light = parseAmbientLight(x1, x2, x3, x4);
+        scene->ambientLight = parseAmbientLight(x1, x2, x3, x4);
         break;
     case 'd':
-        scene->lightDirs->push_back(parseLightDirection(x1, x2, x3, x4));
+        light  = parseLightDirection(x1, x2, x3, x4);
+        scene->lights->push_back(light);
+        if (light->type == Spotlight)
+            scene->spotlights->push_back(const_cast<SpotLight*>(reinterpret_cast<const SpotLight*>(light)));
         break;
     case 'p':
-        scene->spotlightPositions->push_back(parseSpotlightPosition(x1, x2, x3, x4));
+        scene->spotlights->at(*nextSpotlightPosition)->setPosition(x1, x2, x3);
+        scene->spotlights->at(*nextSpotlightPosition)->setAngle(x4);
+        (*nextSpotlightPosition)++;
         break;
     case 'i':
-        scene->intensities->push_back(parseLightIntensity(x1, x2, x3, x4));
+        scene->lights->at(*nextIntensityPosition)->setIntensity(x1, x2, x3, x4);
+        (*nextIntensityPosition)++;
         break;
     case 'c':
         orderedObjects->at(*nextColoredObject)->setColor(x1, x2, x3, x4);
         (*nextColoredObject)++;
-        scene->colors->push_back(parseColor(x1, x2, x3, x4));
         break;
     default:
         //objectDescriptor obj;
         if (x4 > 0)
         {
-            sphere *obj = parseSphere(op, x1, x2, x3, x4);
+            Sphere *obj = parseSphere(op, x1, x2, x3, x4);
             scene->spheres->push_back(obj);
             obj = scene->spheres->at(scene->spheres->size() - 1);
             orderedObjects->push_back(obj);
         }
         else
         {
-            plane *obj = parsePlane(op, x1, x2, x3, x4);
+            Plane *obj = parsePlane(op, x1, x2, x3, x4);
             scene->planes->push_back(obj);
             obj = scene->planes->at(scene->planes->size() - 1);
             orderedObjects->push_back(obj);
@@ -137,9 +126,9 @@ static void parseLine(char op, double x1, double x2, double x3, double x4, scene
     }
 }
 
-eye *parseEye(double x1, double x2, double x3, double x4)
+Eye *parseEye(double x1, double x2, double x3, double x4)
 {
-    return new eye{
+    return new Eye{
         .x = x1,
         .y = x2,
         .z = x3,
@@ -147,57 +136,23 @@ eye *parseEye(double x1, double x2, double x3, double x4)
     };
 }
 
-ambientLight *parseAmbientLight(double x1, double x2, double x3, double x4)
+glm::vec4 *parseAmbientLight(double x1, double x2, double x3, double x4)
 {
-    return new ambientLight{
-        .R = x1,
-        .G = x2,
-        .B = x3,
-        .A = x4
-    };
+    return new glm::vec4(x1, x2, x3, x4);
 }
 
-lightDir parseLightDirection(double x1, double x2, double x3, double x4)
+Light *parseLightDirection(double x1, double x2, double x3, double x4)
 {
-    return lightDir{
-        .x = x1,
-        .y = x2,
-        .z = x3,
-        .isSpotlight = (bool) x4
-    };
+    Light *light = nullptr;
+    if ((bool) x4)
+        light = new SpotLight();
+    else
+        light = new DirectionalLight();
+    light->setDirection(x1, x2, x3);
+    return light;
 }
 
-spotlightPosition parseSpotlightPosition(double x1, double x2, double x3, double x4)
-{
-    return spotlightPosition{
-        .x = x1,
-        .y = x2,
-        .z = x3,
-        .w = x4
-    };
-}
-
-intensity parseLightIntensity(double x1, double x2, double x3, double x4)
-{
-    return intensity{
-        .R = x1,
-        .G = x2,
-        .B = x3,
-        .A = x4
-    };
-}
-
-color parseColor(double x1, double x2, double x3, double x4)
-{
-    return color{
-        .R = x1,
-        .G = x2,
-        .B = x3,
-        .A = x4
-    };
-}
-
-objectType getType(char c)
+ObjectType getType(char c)
 {
     switch (c)
     {
@@ -210,16 +165,16 @@ objectType getType(char c)
     }
 }
 
-sphere *parseSphere(char op, double x1, double x2, double x3, double x4)
+Sphere *parseSphere(char op, double x1, double x2, double x3, double x4)
 {
-    objectType type = getType(op);
-    sphere *s = new sphere(x1, x2, x3, 0, type);
+    ObjectType type = getType(op);
+    Sphere *s = new Sphere(x1, x2, x3, 0, type);
     s->setRadius(x4);
     return s;
 }
 
-plane *parsePlane(char op, double x1, double x2, double x3, double x4)
+Plane *parsePlane(char op, double x1, double x2, double x3, double x4)
 {
-    objectType type = getType(op);
-    return new plane(x1, x2, x3, x4, type);
+    ObjectType type = getType(op);
+    return new Plane(x1, x2, x3, x4, type);
 }

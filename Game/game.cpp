@@ -29,7 +29,7 @@ void Game::Init()
 	AddShader("../res/shaders/pickingShader");	
 	AddShader("../res/shaders/basicShader");
 
-	sceneDesription sc = parseInputFile("/home/alon/Desktop/graphics/BasicEngine/Game/scene.txt");
+	SceneDesription sc = parseInputFile("/home/alon/Desktop/graphics/BasicEngine/Game/scene.txt");
 	printParsedInput(sc);
 
 	Tracer *tracer = new Tracer();
