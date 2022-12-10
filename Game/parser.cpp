@@ -22,7 +22,7 @@ static void printParsedInput(SceneDesription scene){
     for (int i = 0; i < spheres.size(); i++)
     {
         Sphere obj = *spheres.at(i);
-        cout << "    <Sphere: type=" << obj.type << ", radius="<< obj.radius << ", position=" << obj.position.x << "," << obj.position.y << "," << obj.position.z << ", color="<< obj.objColor.r << "," << obj.objColor.g << "," << obj.objColor.b << "," << obj.objColor.a <<" >" << endl;
+        cout << "    <Sphere: type=" << obj.type << ", radius="<< obj.radius << ", position=" << obj.position.x << "," << obj.position.y << "," << obj.position.z << ", color="<< obj.color.r << "," << obj.color.g << "," << obj.color.b << "," << obj.color.a <<" >" << endl;
     }
     cout << ">" << endl;
 
@@ -31,7 +31,7 @@ static void printParsedInput(SceneDesription scene){
     for (int i = 0; i < planes.size(); i++)
     {
         Plane obj = *planes.at(i);
-        cout << "    <Plane: type=" << obj.type << ", values=" << obj.a << "," << obj.b << "," << obj.c << "," << obj.d << ", color="<< obj.objColor.r << "," << obj.objColor.g << "," << obj.objColor.b << "," << obj.objColor.a <<" >" << endl;
+        cout << "    <Plane: type=" << obj.type << ", values=" << obj.a << "," << obj.b << "," << obj.c << "," << obj.d << ", color="<< obj.color.r << "," << obj.color.g << "," << obj.color.b << "," << obj.color.a <<" >" << endl;
     }
     cout << ">" << endl;
 

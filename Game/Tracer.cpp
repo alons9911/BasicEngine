@@ -187,11 +187,32 @@ glm::vec4 Tracer::rayGenerator(int x, int y)
 }
 
 glm::vec3 Tracer::getSphereColor(const Tracer::RayInfo &traceInfo, const Ray &ray){
+    glm::vec4 sphereColor(0.0f);
+    Sphere *sphere = traceInfo.closestSphere;
+    sphereColor += scene->ambientLight;
+
+    glm::vec4 Ks(0.7f, 0.7f, 0.7f, 1.0f);
+
+    glm::vec4 totalDiffuseReflection(0.0f);
+    for (int i = 0; i < scene->lights->size(); i++)
+    {
+        Light *light  = scene->lights->at(i);
+        glm::vec4 Kd = sphere->color;
+        float cosTheta = glm::dot(glm::normalize(traceInfo.worldNormal), glm::normalize(-(light->direction)));
+        glm::vec4 diffuseValue = Kd * cosTheta * (light->intensity);
+        glm::vec4 lightDiffuseReflection = diffuseValue;
+        totalDiffuseReflection += lightDiffuseReflection;
+    }
+    sphereColor += totalDiffuseReflection;
+    return glm::vec3(sphereColor.r, sphereColor.g, sphereColor.b);
+    
+    
+    /*
     glm::vec3 lightDir = glm::normalize(glm::vec3(0.0f, 0.0f, -1.0f));
     float intensity = glm::max(glm::dot(traceInfo.worldNormal, -lightDir), 0.0f); // == cos(alpha)
     
     Sphere *closestSphere = traceInfo.closestSphere;
-    glm::vec3 sphereColor = glm::vec3(closestSphere->objColor.r, closestSphere->objColor.g, closestSphere->objColor.b);
+    sphereColor = glm::vec3(closestSphere->color.r, closestSphere->color.g, closestSphere->color.b);
     sphereColor *= intensity;
-    return sphereColor;
+    return sphereColor;*/
 }
