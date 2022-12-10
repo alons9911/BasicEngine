@@ -252,8 +252,8 @@ bool Tracer::isInLight(RayInfo traceInfo, Light *light)
         distanceToLight = glm::length(lightDirection);
         lightDirection = glm::normalize(lightDirection);
         float cosAlpha = glm::dot(lightDirection, glm::normalize(spotlight->direction));
-            if (glm::acos(cosAlpha) > glm::acos(spotlight->w))
-                return false;
+        if (glm::acos(cosAlpha) > glm::acos(spotlight->w))
+            return false;
     }
 
     Ray ray;
