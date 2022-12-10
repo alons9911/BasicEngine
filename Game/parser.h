@@ -17,10 +17,14 @@ struct Descriptor
 struct ObjectDescriptor : Descriptor
 {
     ObjectType type;
-    glm::vec4 color;
+    glm::vec3 color;
+    float shininess;
 
-    void setColor(float r, float g, float b, float a) {
-      this->color = glm::vec4(r, g, b, a); 
+    void setColor(float r, float g, float b) {
+      this->color = glm::vec3(r, g, b); 
+    }
+    void setShininess(float shininess){
+      this->shininess = shininess;
     }
 };
 
@@ -57,6 +61,10 @@ struct Light : Descriptor
 
   void setIntensity(float r, float g, float b, float a) {
       this->intensity = glm::vec4(r, g, b, a); 
+  }
+
+  glm::vec3 getRGBIntensity() {
+    return glm::vec3(this->intensity.r, this->intensity.g, this->intensity.b);
   }
 };
 

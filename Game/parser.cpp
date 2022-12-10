@@ -22,7 +22,7 @@ static void printParsedInput(SceneDesription scene){
     for (int i = 0; i < spheres.size(); i++)
     {
         Sphere obj = *spheres.at(i);
-        cout << "    <Sphere: type=" << obj.type << ", radius="<< obj.radius << ", position=" << obj.position.x << "," << obj.position.y << "," << obj.position.z << ", color="<< obj.color.r << "," << obj.color.g << "," << obj.color.b << "," << obj.color.a <<" >" << endl;
+        cout << "    <Sphere: type=" << obj.type << ", radius="<< obj.radius << ", position=" << obj.position.x << "," << obj.position.y << "," << obj.position.z << ", color="<< obj.color.r << "," << obj.color.g << "," << obj.color.b << ", shininess=" << obj.shininess << " >" << endl;
     }
     cout << ">" << endl;
 
@@ -31,7 +31,7 @@ static void printParsedInput(SceneDesription scene){
     for (int i = 0; i < planes.size(); i++)
     {
         Plane obj = *planes.at(i);
-        cout << "    <Plane: type=" << obj.type << ", values=" << obj.a << "," << obj.b << "," << obj.c << "," << obj.d << ", color="<< obj.color.r << "," << obj.color.g << "," << obj.color.b << "," << obj.color.a <<" >" << endl;
+        cout << "    <Plane: type=" << obj.type << ", values=" << obj.a << "," << obj.b << "," << obj.c << "," << obj.d << ", color="<< obj.color.r << "," << obj.color.g << "," << obj.color.b << ", shininess=" << obj.shininess <<" >" << endl;
     }
     cout << ">" << endl;
 
@@ -104,7 +104,8 @@ vector<ObjectDescriptor*> *orderedObjects, int *nextColoredObject, int *nextSpot
         (*nextIntensityPosition)++;
         break;
     case 'c':
-        orderedObjects->at(*nextColoredObject)->setColor(x1, x2, x3, x4);
+        orderedObjects->at(*nextColoredObject)->setColor(x1, x2, x3);
+        orderedObjects->at(*nextColoredObject)->setShininess(x4);
         (*nextColoredObject)++;
         break;
     default:

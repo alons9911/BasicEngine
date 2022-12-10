@@ -182,37 +182,51 @@ glm::vec4 Tracer::rayGenerator(int x, int y)
     
     glm::vec3 backgroundColor = glm::vec3(0.0f, 0.0f, 0.0f);
 
-    glm::vec3 finalColor = innerRayGenerator(ray, glm::vec3(0.0f), 5, 1.0f, backgroundColor);
+    glm::vec3 finalColor = innerRayGenerator(ray, glm::vec3(0.0f), 1, 1.0f, backgroundColor);
     return glm::vec4(finalColor, 1.0f);
 }
 
 glm::vec3 Tracer::getSphereColor(const Tracer::RayInfo &traceInfo, const Ray &ray){
-    glm::vec4 sphereColor(0.0f);
+    glm::vec3 sphereColor(0.0f);
     Sphere *sphere = traceInfo.closestSphere;
-    sphereColor += scene->ambientLight;
+    sphereColor += glm::vec3(*(scene->ambientLight));
 
-    glm::vec4 Ks(0.7f, 0.7f, 0.7f, 1.0f);
+    glm::vec3 Ks(0.7f, 0.7f, 0.7f);
 
-    glm::vec4 totalDiffuseReflection(0.0f);
+    glm::vec3 totalDiffuseReflection(0.0f);
+    glm::vec3 totalSpecularReflection(0.0f);
     for (int i = 0; i < scene->lights->size(); i++)
     {
         Light *light  = scene->lights->at(i);
-        glm::vec4 Kd = sphere->color;
+        glm::vec3 Kd = sphere->color;
         float cosTheta = glm::dot(glm::normalize(traceInfo.worldNormal), glm::normalize(-(light->direction)));
-        glm::vec4 diffuseValue = Kd * cosTheta * (light->intensity);
-        glm::vec4 lightDiffuseReflection = diffuseValue;
-        totalDiffuseReflection += lightDiffuseReflection;
+        float diffuseValue_r = Kd.r * cosTheta * (light->getRGBIntensity()).r;
+        float diffuseValue_g = Kd.g * cosTheta * (light->getRGBIntensity()).g;
+        float diffuseValue_b = Kd.b * cosTheta * (light->getRGBIntensity()).b;
+        glm::vec3 diffuseValue(diffuseValue_r, diffuseValue_g, diffuseValue_b);
+        totalDiffuseReflection += diffuseValue;
+        
+        glm::vec3 lightDirecrion = glm::normalize(light->direction);
+        
+        if (light->type == Spotlight)
+        {
+            SpotLight *spotlight = const_cast<SpotLight*>(reinterpret_cast<const SpotLight*>(light));
+            lightDirecrion = glm::normalize(traceInfo.worldPosition - spotlight->position);
+            //float cosAlpha = glm::dot(lightDirecrion, glm::normalize(spotlight->direction));
+            //if (cosAlpha < spotlight->w)
+            //    continue;   
+        }
+        
+
+        glm::vec3 lightReflection = glm::normalize(glm::reflect(lightDirecrion, traceInfo.worldNormal));
+        float VR = glm::pow(glm::max(glm::dot(glm::normalize(-ray.direction), lightReflection), 0.0f),sphere->shininess);
+        float specularValue_r = Ks.r * VR * (light->getRGBIntensity()).r;
+        float specularValue_g = Ks.g * VR * (light->getRGBIntensity()).g;
+        float specularValue_b = Ks.b * VR * (light->getRGBIntensity()).b;
+        glm::vec3 specularValue(specularValue_r, specularValue_g, specularValue_b);
+
+        totalSpecularReflection += specularValue;
     }
-    sphereColor += totalDiffuseReflection;
-    return glm::vec3(sphereColor.r, sphereColor.g, sphereColor.b);
-    
-    
-    /*
-    glm::vec3 lightDir = glm::normalize(glm::vec3(0.0f, 0.0f, -1.0f));
-    float intensity = glm::max(glm::dot(traceInfo.worldNormal, -lightDir), 0.0f); // == cos(alpha)
-    
-    Sphere *closestSphere = traceInfo.closestSphere;
-    sphereColor = glm::vec3(closestSphere->color.r, closestSphere->color.g, closestSphere->color.b);
-    sphereColor *= intensity;
-    return sphereColor;*/
+    sphereColor += totalDiffuseReflection + totalSpecularReflection;
+    return sphereColor;
 }
