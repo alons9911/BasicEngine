@@ -152,6 +152,32 @@ Tracer::RayInfo Tracer::miss(const Ray &ray)
     return missInfo;
 }
 
+glm::vec3 Tracer::innerRayGenerator(const Ray &ray, glm::vec3 color, int reflections, float multiplier, glm::vec3 backgroundColor){
+    if (reflections == 0)
+        return color;
+    
+    Tracer::RayInfo traceInfo = traceRay(ray);
+
+    if (traceInfo.hitDistance < 0.0f){
+        color +=  backgroundColor * multiplier;
+        return color;
+    }
+    glm::vec3 lightDir = glm::normalize(glm::vec3(0.0f, 0.0f, -1.0f));
+    float intensity = glm::max(glm::dot(traceInfo.worldNormal, -lightDir), 0.0f); // == cos(alpha)
+    
+    Sphere *closestSphere = traceInfo.closestSphere;
+    glm::vec3 sphereColor = glm::vec3(closestSphere->objColor.r, closestSphere->objColor.g, closestSphere->objColor.b);
+    sphereColor *= intensity;
+    color += sphereColor * multiplier;
+
+    Ray newRay;
+    newRay.origin = traceInfo.worldPosition + traceInfo.worldNormal * 0.0001f;
+    newRay.direction = glm::reflect(ray.direction, traceInfo.worldNormal);
+
+    return innerRayGenerator(newRay, color, reflections - 1, multiplier * 0.7f, backgroundColor);
+    
+}
+
 glm::vec4 Tracer::rayGenerator(int x, int y)
 {
     Ray ray;
@@ -159,29 +185,8 @@ glm::vec4 Tracer::rayGenerator(int x, int y)
     //ray.origin = glm::vec3(0,0,10);
     ray.direction = getRayDirection(glm::vec2(x, y), ray.origin);
     
-    glm::vec3 finalColor(0.0f);
-    int reflections = 1;
-    float multiplier = 1.0f;
-    for (int i = 0; i < reflections; i++)
-    {
-        Tracer::RayInfo traceInfo = traceRay(ray);
+    glm::vec3 backgroundColor = glm::vec3(0.0f, 0.0f, 0.0f);
 
-        if (traceInfo.hitDistance < 0.0f){
-            glm::vec3 backgroundColor = glm::vec3(0.0f, 0.0f, 0.0f);
-            finalColor +=  backgroundColor * multiplier;
-            break;
-        }
-        glm::vec3 lightDir = glm::normalize(glm::vec3(0.0f, 0.0f, -1.0f));
-        float intensity = glm::max(glm::dot(traceInfo.worldNormal, -lightDir), 0.0f); // == cos(alpha)
-        
-        Sphere *closestSphere = traceInfo.closestSphere;
-        glm::vec3 sphereColor = glm::vec3(closestSphere->objColor.r, closestSphere->objColor.g, closestSphere->objColor.b);
-        sphereColor *= intensity;
-        finalColor += sphereColor * multiplier;
-        multiplier *= 0.7f;
-
-        ray.origin = traceInfo.worldPosition + traceInfo.worldNormal * 0.0001f;
-        ray.direction = glm::reflect(ray.direction, traceInfo.worldNormal);
-    }    
+    glm::vec3 finalColor = innerRayGenerator(ray, glm::vec3(0.0f), 5, 1.0f, backgroundColor);
     return glm::vec4(finalColor, 1.0f);
 }
