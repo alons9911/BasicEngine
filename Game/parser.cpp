@@ -158,11 +158,11 @@ ObjectType getType(char c)
     switch (c)
     {
     case 'r':
-        return reflective;
+        return Reflective;
     case 't':
-        return transparent;
+        return Transparent;
     default:
-        return object;
+        return Object;
     }
 }
 

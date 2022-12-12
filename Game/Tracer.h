@@ -51,7 +51,9 @@ private:
     
     glm::vec3 getSphereColor(const Tracer::RayInfo &traceInfo, const Ray &ray);
     bool isInLight(RayInfo traceInfo, Light *light);
+    Ray calcSnellLaw(Tracer::RayInfo traceInfo, Ray ray, glm::vec3 N, glm::vec3 rayDirection, float snellFrac);
+
 
     glm::vec4 rayGenerator(int x, int y);
-    glm::vec3 innerRayGenerator(const Ray &ray, glm::vec3 color, int reflections, float multiplier, glm::vec3 backgroundColor);
+    glm::vec3 innerRayGenerator(const Ray &ray, int reflectionsDepth, float Ks, glm::vec3 backgroundColor, float snellFrac, int trasparentDepth);
 };

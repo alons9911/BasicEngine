@@ -6,7 +6,7 @@
 
 using namespace std;
 
-enum ObjectType {object, reflective, transparent};
+enum ObjectType {Object, Reflective, Transparent};
 enum LightType {Directional, Spotlight};
 
 
