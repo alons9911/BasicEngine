@@ -108,35 +108,23 @@ ClosestPlaneInfo Tracer::findClosestPlane(const Ray &ray, vector<Plane *> planes
 
     for (Plane *plane : planes)
     {
-        float a = (float)plane->a, b = (float)plane->b, c = (float)plane->c, d = (float)plane->d;
-        glm::vec3 normal = glm::normalize(glm::vec3(a, b, c));
+        glm::vec3 normal = glm::normalize(glm::vec3(plane->a, plane->b, plane->c));
+        float a = normal.x, b = normal.y, c = normal.z, d = (float)plane->d;
+        
         glm::vec3 p0(0.0f);
-        glm::vec3 l0 = glm::normalize(ray.origin), l = glm::normalize(ray.direction);
-        if (a != 0.0f)
-        {
-            p0 = glm::vec3(-d / a, 0.0f, 0.0f);
-        }
-        else if (b != 0.0f)
-        {
-            p0 = glm::vec3(0.0f, -d / b, 0.0f);
-        }
-        else if (c != 0.0f)
-        {
-            p0 = glm::vec3(0.0f, 0.0f, -d / c);
-        }
-        p0 = glm::normalize(p0);
+        glm::vec3 l0 = ray.origin, l = glm::normalize(ray.direction);
 
-        float denom = glm::dot(normal, l);
+        float denom = (a * ray.direction.x + b * ray.direction.y + c * ray.direction.z);
+
         if (denom != 0)
         {
-            float t = glm::dot((p0 - l0), normal) / denom;
+            float t = -(a * ray.origin.x + b * ray.origin.y + c * ray.origin.z + d) / denom;
             if (t > 0.0001 && t < hitDistance)
             {
                 closestPlane = plane;
                 hitDistance = t;
             }
         }
-
     }
     return ClosestPlaneInfo(closestPlane, hitDistance);
 }
@@ -144,22 +132,46 @@ ClosestPlaneInfo Tracer::findClosestPlane(const Ray &ray, vector<Plane *> planes
 Tracer::RayInfo Tracer::traceRay(const Ray &ray)
 {
     vector<Sphere *> spheres = *scene->spheres;
-    ClosestSphereInfo closest = findClosestSphere(ray, spheres, FLT_MAX, nullptr);
+    ClosestSphereInfo closestSphere = findClosestSphere(ray, spheres, FLT_MAX, nullptr);
 
-        if (closest.closestSphere == nullptr) return miss(ray);
-    return closestHit(ray, closest.closestSphere, closest.hitDistance);
+    vector<Plane *> planes = *scene->planes;
+    ClosestPlaneInfo closestPlane = findClosestPlane(ray, planes, FLT_MAX);
+
+    if (closestSphere.closestSphere == nullptr && closestPlane.closestPlane == nullptr)
+        return miss(ray);
+    if (closestSphere.closestSphere == nullptr)
+        return closestHitPlane(ray, closestPlane.closestPlane, closestPlane.hitDistance);
+    if (closestPlane.closestPlane == nullptr)
+        return closestHitSphere(ray, closestSphere.closestSphere, closestSphere.hitDistance);
+    if (closestSphere.hitDistance <= closestPlane.hitDistance){
+        return closestHitSphere(ray, closestSphere.closestSphere, closestSphere.hitDistance);
+    }
+    //cout << "plane - " << closestPlane.hitDistance  << ", sphere - " << closestSphere.hitDistance << endl;
+    return closestHitPlane(ray, closestPlane.closestPlane, closestPlane.hitDistance);
 }
 
-Tracer::RayInfo Tracer::closestHit(const Ray &ray, Sphere *closestSphere, float hitDistance)
+Tracer::RayInfo Tracer::closestHitSphere(const Ray &ray, Sphere *closestSphere, float hitDistance)
 {
     glm::vec3 origin = ray.origin - closestSphere->position;
     glm::vec3 hitPosition = origin + ray.direction * hitDistance;
     glm::vec3 normal = glm::normalize(hitPosition);
 
-    RayInfo result;
+    Tracer::RayInfo result;
     result.hitDistance = hitDistance;
-    result.closestSphere = closestSphere;
+    result.closestObject = closestSphere;
     result.worldPosition = hitPosition + closestSphere->position;
+    result.worldNormal = normal;
+    return result;
+}
+
+Tracer::RayInfo Tracer::closestHitPlane(const Ray &ray, Plane *closestPlane, float hitDistance)
+{
+    glm::vec3 normal = glm::normalize(glm::vec3(closestPlane->a, closestPlane->b, closestPlane->c));
+
+    Tracer::RayInfo result;
+    result.hitDistance = hitDistance;
+    result.closestObject = closestPlane;
+    result.worldPosition = ray.origin + ray.direction * hitDistance;
     result.worldNormal = normal;
     return result;
 }
@@ -207,7 +219,7 @@ glm::vec3 Tracer::innerRayGenerator(const Ray &ray, int reflectionsDepth, float 
         return backgroundColor;
     glm::vec3 sphereColor = getSphereColor(traceInfo, ray);
 
-    if (traceInfo.closestSphere->type == Reflective)
+    if (traceInfo.closestObject->type == Reflective)
     {
         if (reflectionsDepth >= 5)
             return backgroundColor;
@@ -217,7 +229,7 @@ glm::vec3 Tracer::innerRayGenerator(const Ray &ray, int reflectionsDepth, float 
 
         sphereColor += Ks * innerRayGenerator(newRay, reflectionsDepth + 1, Ks, backgroundColor, snellFrac, trasparentDepth);
     }
-    else if (traceInfo.closestSphere->type == Transparent)
+    else if (traceInfo.closestObject->type == Transparent)
     {
         glm::vec3 transparentColor(0.0f);
         if (trasparentDepth >= 5)
@@ -233,7 +245,7 @@ glm::vec3 Tracer::innerRayGenerator(const Ray &ray, int reflectionsDepth, float 
             return glm::vec3(255);
         }
 
-        if (inTransInfo.closestSphere != traceInfo.closestSphere)
+        if (inTransInfo.closestObject != traceInfo.closestObject)
             transparentColor = innerRayGenerator(inTransRay, reflectionsDepth, Ks, backgroundColor, snellFrac, trasparentDepth + 1);
         else
         {
@@ -344,14 +356,14 @@ glm::vec4 Tracer::rayGenerator(int x, int y)
                             innerRayGenerator(ray2, 0, 0.7f, backgroundColor, 1.0f / 1.5f, 0) +
                             innerRayGenerator(ray3, 0, 0.7f, backgroundColor, 1.0f / 1.5f, 0) +
                             innerRayGenerator(ray4, 0, 0.7f, backgroundColor, 1.0f / 1.5f, 0)) /
-                            4.0f;
+                           4.0f;
     return glm::vec4(finalColor, 1.0f);
 }
 
 glm::vec3 Tracer::getSphereColor(const Tracer::RayInfo &traceInfo, const Ray &ray)
 {
     glm::vec3 sphereColor(0.0f);
-    Sphere *sphere = traceInfo.closestSphere;
+    ObjectDescriptor *sphere = traceInfo.closestObject;
     sphereColor += glm::vec3(*(scene->ambientLight));
 
     glm::vec3 Ks(0.7f, 0.7f, 0.7f);
@@ -397,7 +409,7 @@ glm::vec3 Tracer::getSphereColor(const Tracer::RayInfo &traceInfo, const Ray &ra
     return sphereColor;
 }
 
-bool Tracer::isInLight(RayInfo traceInfo, Light * light)
+bool Tracer::isInLight(RayInfo traceInfo, Light *light)
 {
     glm::vec3 lightDirection = glm::normalize(light->direction);
     float distanceToLight = FLT_MAX;
@@ -417,7 +429,7 @@ bool Tracer::isInLight(RayInfo traceInfo, Light * light)
     ray.direction = -lightDirection;
     ray.origin = traceInfo.worldPosition;
     vector<Sphere *> spheres = *(scene->spheres);
-    ClosestSphereInfo closest = findClosestSphere(ray, spheres, distanceToLight, traceInfo.closestSphere);
+    ClosestSphereInfo closest = findClosestSphere(ray, spheres, distanceToLight, const_cast<Sphere*>(reinterpret_cast<const Sphere*>(traceInfo.closestObject)));
     // if (distanceToLight != closest.hitDistance)
     //     cout << distanceToLight << "," << closest.hitDistance  << "," << (closest.closestSphere == nullptr) << endl;
     return closest.closestSphere == nullptr;

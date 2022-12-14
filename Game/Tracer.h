@@ -41,13 +41,13 @@ public:
     unsigned char *getImageData() {return imageData;}
 
     int const IMG_HEIGHT = 800, IMG_WIDTH = 800;
-private:
     struct RayInfo{
         float hitDistance;
         glm::vec3 worldPosition;
         glm::vec3 worldNormal;
-        Sphere *closestSphere;
+        ObjectDescriptor *closestObject;
     };
+    private:
     unsigned char *imageData = nullptr;
     vector<vector<unsigned char>> *finalImage;
     SceneDesription *scene = nullptr;
@@ -57,7 +57,8 @@ private:
     RayInfo traceRay(const Ray &ray);
     ClosestSphereInfo findClosestSphere(const Ray &ray, vector<Sphere*> spheres, float maxHitDistance, Sphere *excludedSphere);
     ClosestPlaneInfo findClosestPlane(const Ray &ray, vector<Plane *> planes, float maxHitDistance);
-    RayInfo closestHit(const Ray &ray, Sphere *closestSphere, float hitDistance);
+    RayInfo closestHitSphere(const Ray &ray, Sphere *closestSphere, float hitDistance);
+    RayInfo closestHitPlane(const Ray &ray, Plane *closestPlane, float hitDistance);
     RayInfo miss(const Ray &ray);
     
     glm::vec3 getSphereColor(const Tracer::RayInfo &traceInfo, const Ray &ray);
