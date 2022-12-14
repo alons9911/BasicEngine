@@ -22,6 +22,16 @@ struct ClosestSphereInfo{
     float hitDistance;
 };
 
+struct ClosestPlaneInfo{
+    ClosestPlaneInfo(Plane *closestPlane, float hitDistance){
+        this->closestPlane = closestPlane;
+        this->hitDistance = hitDistance;
+    }
+
+    Plane *closestPlane;
+    float hitDistance;
+};
+
 class Tracer
 {
 public:
@@ -46,6 +56,7 @@ private:
     glm::vec3 getRayDirection(glm::vec2 boardCoordinate, glm::vec3 origin);
     RayInfo traceRay(const Ray &ray);
     ClosestSphereInfo findClosestSphere(const Ray &ray, vector<Sphere*> spheres, float maxHitDistance, Sphere *excludedSphere);
+    ClosestPlaneInfo findClosestPlane(const Ray &ray, vector<Plane *> planes, float maxHitDistance);
     RayInfo closestHit(const Ray &ray, Sphere *closestSphere, float hitDistance);
     RayInfo miss(const Ray &ray);
     
