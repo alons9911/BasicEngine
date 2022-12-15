@@ -29,7 +29,7 @@ void Game::Init()
 	AddShader("../res/shaders/pickingShader");	
 	AddShader("../res/shaders/basicShader");
 
-	SceneDesription sc = parseInputFile("/home/alon/Desktop/graphics/BasicEngine/Game/scene.txt");
+	SceneDesription sc = parseInputFile("../res/scene.txt");
 	printParsedInput(sc);
 
 	Tracer *tracer = new Tracer();
@@ -38,8 +38,6 @@ void Game::Init()
 
 	AddTexture(800, 800, data);
 	
-	//AddTexture("../res/textures/box0.bmp",false);
-
 	AddShape(Plane,-1,TRIANGLES);
 	
 	pickedShape = 0;
