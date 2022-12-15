@@ -7,6 +7,7 @@
 using namespace std;
 
 enum ObjectType {Object, Reflective, Transparent};
+enum ObjectClass {PlaneClass, SphereClass};
 enum LightType {Directional, Spotlight};
 
 
@@ -19,6 +20,8 @@ struct ObjectDescriptor : Descriptor
     ObjectType type;
     glm::vec3 color;
     float shininess;
+    ObjectClass objectClass;
+
 
     void setColor(float r, float g, float b) {
       this->color = glm::vec3(r, g, b); 
@@ -97,6 +100,7 @@ struct Sphere : ObjectDescriptor
     this->position = glm::vec3(x, y, z);
     this->radius = radius;
     this->type = type;
+    this->objectClass = SphereClass;
   };
 
   void setRadius(double r){this->radius = r;}
@@ -112,6 +116,7 @@ struct Plane : ObjectDescriptor
     this->c = c;
     this->d = d;
     this->type = type;
+    this->objectClass = PlaneClass;
   };
   double a;
   double b;

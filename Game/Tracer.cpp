@@ -167,6 +167,8 @@ Tracer::RayInfo Tracer::closestHitSphere(const Ray &ray, Sphere *closestSphere, 
 Tracer::RayInfo Tracer::closestHitPlane(const Ray &ray, Plane *closestPlane, float hitDistance)
 {
     glm::vec3 normal = glm::normalize(glm::vec3(closestPlane->a, closestPlane->b, closestPlane->c));
+    if (glm::dot(normal, ray.direction) > 0)
+        normal *= -1;
 
     Tracer::RayInfo result;
     result.hitDistance = hitDistance;
@@ -191,23 +193,24 @@ Ray Tracer::calcSnellLaw(Tracer::RayInfo traceInfo, Ray ray, glm::vec3 N, glm::v
     // cout << "cos theta1 - " << cosTheta1 << endl;
     float theta1 = glm::acos(glm::min(cosTheta1, 1.0f));
     // cout <<"depth - " << depth <<endl;
-    // cout <<"t1 - " << theta1 * (180.0f / (float)M_PI) <<endl;
+    //cout <<"t1 - " << theta1 * (180.0f / (float)M_PI) <<endl;
     float sinTheta1 = glm::clamp(glm::sin(theta1), -1.0f, 1.0f);
 
     float sinTheate2 = glm::clamp(snellFrac * sinTheta1, -1.0f, 1.0f);
     float theta2 = glm::asin(sinTheate2);
-    // cout <<"t2 - " << theta2 * (180.0f / (float)M_PI)<<endl;
+    //cout <<"t2 - " << theta2 * (180.0f / (float)M_PI)<<endl;
     float cosTheta2 = glm::cos(theta2);
     if (isnan(theta2))
     {
         Ray newRay;
         newRay.origin = traceInfo.worldPosition + traceInfo.worldNormal * 0.0001f;
         newRay.direction = glm::reflect(ray.direction, traceInfo.worldNormal);
+        return newRay;
     }
 
     Ray newRay;
     newRay.direction = (snellFrac * cosTheta1 - cosTheta2) * N - snellFrac * (-ray.direction);
-    newRay.origin = traceInfo.worldPosition - 0.001f * N;
+    newRay.origin = traceInfo.worldPosition - 0.0001f * N;
     return newRay;
 }
 
@@ -234,32 +237,42 @@ glm::vec3 Tracer::innerRayGenerator(const Ray &ray, int reflectionsDepth, float 
         glm::vec3 transparentColor(0.0f);
         if (trasparentDepth >= 5)
             return glm::vec3(0.0f);
-
-        Ray inTransRay = calcSnellLaw(traceInfo, ray, traceInfo.worldNormal, -ray.direction, snellFrac);
-
-        Tracer::RayInfo inTransInfo = traceRay(inTransRay);
-        if (inTransInfo.hitDistance < 0.0f)
+        if (traceInfo.closestObject->objectClass == PlaneClass)
         {
-            // cout << inTransInfo.hitDistance << endl;
-            // cout << inTransRay.direction.x << "," << inTransRay.direction.y << "," << inTransRay.direction.z <<endl;
-            return glm::vec3(255);
+            Ray newRay;
+            newRay.origin = traceInfo.worldPosition - traceInfo.worldNormal * 0.0001f;
+            newRay.direction = ray.direction;
+            transparentColor = innerRayGenerator(newRay, reflectionsDepth, Ks, backgroundColor, snellFrac, trasparentDepth + 1);
+            
         }
-
-        if (inTransInfo.closestObject != traceInfo.closestObject)
-            transparentColor = innerRayGenerator(inTransRay, reflectionsDepth, Ks, backgroundColor, snellFrac, trasparentDepth + 1);
-        else
+        else // Transparent object is sphere
         {
-            // cout << "inserting calcSnellLaw outTraceRay" <<endl;
-            Ray outTransRay = calcSnellLaw(inTransInfo, inTransRay, -traceInfo.worldNormal, -inTransRay.direction, 1.0f / snellFrac);
+            Ray inTransRay = calcSnellLaw(traceInfo, ray, traceInfo.worldNormal, -ray.direction, snellFrac);
 
-            Tracer::RayInfo outTransInfo = traceRay(outTransRay);
-            if (outTransInfo.hitDistance < 0.0f)
+            Tracer::RayInfo inTransInfo = traceRay(inTransRay);
+            if (inTransInfo.hitDistance < 0.0f)
+            {
+                // cout << inTransInfo.hitDistance << endl;
+                // cout << inTransRay.direction.x << "," << inTransRay.direction.y << "," << inTransRay.direction.z <<endl;
                 return glm::vec3(0.0f);
+            }
 
-            // Ray newRay;
-            // newRay.origin = outTransInfo.worldPosition + outTransInfo.worldNormal * 0.0001f;
-            // newRay.direction =outTransRay.direction;
-            transparentColor = innerRayGenerator(outTransRay, reflectionsDepth, Ks, backgroundColor, snellFrac, trasparentDepth + 1);
+            if (inTransInfo.closestObject != traceInfo.closestObject)
+                transparentColor = innerRayGenerator(inTransRay, reflectionsDepth, Ks, backgroundColor, snellFrac, trasparentDepth + 1);
+            else
+            {
+                // cout << "inserting calcSnellLaw outTraceRay" <<endl;
+                Ray outTransRay = calcSnellLaw(inTransInfo, inTransRay, -traceInfo.worldNormal, -inTransRay.direction, 1.0f / snellFrac);
+
+                Tracer::RayInfo outTransInfo = traceRay(outTransRay);
+                if (outTransInfo.hitDistance < 0.0f)
+                    return glm::vec3(0.0f);
+
+                // Ray newRay;
+                // newRay.origin = outTransInfo.worldPosition + outTransInfo.worldNormal * 0.0001f;
+                // newRay.direction =outTransRay.direction;
+                transparentColor = innerRayGenerator(outTransRay, reflectionsDepth, Ks, backgroundColor, snellFrac, trasparentDepth + 1);
+            }
         }
         sphereColor += Ks * transparentColor;
 
@@ -364,12 +377,23 @@ glm::vec3 Tracer::getSphereColor(const Tracer::RayInfo &traceInfo, const Ray &ra
 {
     glm::vec3 sphereColor(0.0f);
     ObjectDescriptor *sphere = traceInfo.closestObject;
-    sphereColor += glm::vec3(*(scene->ambientLight));
+    sphereColor += glm::vec3(*(scene->ambientLight)) * traceInfo.closestObject->color;
 
     glm::vec3 Ks(0.7f, 0.7f, 0.7f);
 
     glm::vec3 totalDiffuseReflection(0.0f);
     glm::vec3 totalSpecularReflection(0.0f);
+
+    float chessCoefficient = 1.0f;
+
+
+    if (traceInfo.closestObject->objectClass == PlaneClass)
+    {
+        if (isBlackSquare(const_cast<Plane*>(reinterpret_cast<const Plane*>(traceInfo.closestObject)), traceInfo.worldPosition)){
+            chessCoefficient = 0.5f;
+        }
+    }
+
     for (int i = 0; i < scene->lights->size(); i++)
     {
         Light *light = scene->lights->at(i);
@@ -379,9 +403,9 @@ glm::vec3 Tracer::getSphereColor(const Tracer::RayInfo &traceInfo, const Ray &ra
 
         glm::vec3 Kd = sphere->color;
         float cosTheta = glm::dot(glm::normalize(traceInfo.worldNormal), glm::normalize(-(light->direction)));
-        float diffuseValue_r = Kd.r * cosTheta * (light->getRGBIntensity()).r;
-        float diffuseValue_g = Kd.g * cosTheta * (light->getRGBIntensity()).g;
-        float diffuseValue_b = Kd.b * cosTheta * (light->getRGBIntensity()).b;
+        float diffuseValue_r = chessCoefficient * Kd.r * cosTheta * (light->getRGBIntensity()).r;
+        float diffuseValue_g = chessCoefficient * Kd.g * cosTheta * (light->getRGBIntensity()).g;
+        float diffuseValue_b = chessCoefficient * Kd.b * cosTheta * (light->getRGBIntensity()).b;
         glm::vec3 diffuseValue(diffuseValue_r, diffuseValue_g, diffuseValue_b);
         totalDiffuseReflection += diffuseValue;
 
@@ -406,8 +430,15 @@ glm::vec3 Tracer::getSphereColor(const Tracer::RayInfo &traceInfo, const Ray &ra
         totalSpecularReflection += specularValue;
     }
     sphereColor += totalDiffuseReflection + totalSpecularReflection;
-    return sphereColor;
+    return sphereColor;// * chessCoefficient;
 }
+ bool Tracer::isBlackSquare(Plane* plane, glm::vec3 position)
+ {
+    float x = position.x, y = position.y;
+    return !(((int)std::floor(1.5 * x) % 2 == (int)std::floor(1.5 * -y) % 2) ||
+            ((int)std::floor(1.5 * -x) % 2 == (int)std::floor(1.5 * y) % 2));
+ }
+
 
 bool Tracer::isInLight(RayInfo traceInfo, Light *light)
 {
