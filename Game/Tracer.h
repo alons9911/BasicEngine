@@ -54,7 +54,7 @@ public:
 
 
     glm::vec3 getRayDirection(glm::vec2 boardCoordinate, glm::vec3 origin);
-    RayInfo traceRay(const Ray &ray);
+    RayInfo traceRay(const Ray &ray, Sphere *excludedSphere);
     ClosestSphereInfo findClosestSphere(const Ray &ray, vector<Sphere*> spheres, float maxHitDistance, Sphere *excludedSphere);
     ClosestPlaneInfo findClosestPlane(const Ray &ray, vector<Plane *> planes, float maxHitDistance);
     RayInfo closestHitSphere(const Ray &ray, Sphere *closestSphere, float hitDistance);
