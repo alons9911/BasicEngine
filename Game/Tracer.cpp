@@ -201,7 +201,7 @@ glm::vec3 Tracer::innerRayGenerator(const Ray &ray, int reflectionsDepth, float 
     {
         glm::vec3 transparentColor(0.0f);
         if (trasparentDepth >= 5)
-            return glm::vec3(0.0f);
+            return sphereColor;
         if (traceInfo.closestObject->objectClass == PlaneClass)
         {
             Ray newRay;
@@ -227,7 +227,7 @@ glm::vec3 Tracer::innerRayGenerator(const Ray &ray, int reflectionsDepth, float 
                 {
                     inTransInfo = traceRay(inTransRay, const_cast<Sphere*>(reinterpret_cast<const Sphere*>(traceInfo.closestObject)));
                     if (inTransInfo.hitDistance < 0.0f)
-                        return Ks * sphereColor;
+                        return  backgroundColor + Ks * sphereColor;
                 }
                 if (inTransInfo.closestObject != traceInfo.closestObject)
                     transparentColor = innerRayGenerator(inTransRay, reflectionsDepth, Ks, backgroundColor, snellFrac, trasparentDepth + 1);
@@ -240,7 +240,7 @@ glm::vec3 Tracer::innerRayGenerator(const Ray &ray, int reflectionsDepth, float 
                         outTransInfo = traceRay(outTransRay, const_cast<Sphere*>(reinterpret_cast<const Sphere*>(inTransInfo.closestObject)));
                         if (outTransInfo.hitDistance < 0.0f)
                         {
-                            return Ks * sphereColor;
+                            return backgroundColor + Ks * sphereColor;
                         }
                         
                         
@@ -249,7 +249,7 @@ glm::vec3 Tracer::innerRayGenerator(const Ray &ray, int reflectionsDepth, float 
                 }
             }
         }
-        sphereColor += Ks * transparentColor;
+        return sphereColor + Ks * transparentColor -  (glm::vec3(*(scene->ambientLight)) * traceInfo.closestObject->color);
     }
     return sphereColor;
 }
@@ -305,7 +305,7 @@ glm::vec3 Tracer::getSphereColor(const Tracer::RayInfo &traceInfo, const Ray &ra
     {
         Light *light = scene->lights->at(i);
 
-        if (!isInLight(traceInfo, light))
+        if (!isInLight(traceInfo, light, 5, 1.5f / 1.0f))
             continue;
 
         glm::vec3 Kd = sphere->color;
@@ -344,8 +344,11 @@ glm::vec3 Tracer::getSphereColor(const Tracer::RayInfo &traceInfo, const Ray &ra
  }
 
 
-bool Tracer::isInLight(RayInfo traceInfo, Light *light)
+bool Tracer::isInLight(RayInfo traceInfo, Light *light, int maxRecursion, float snellFrac)
 {
+    if (maxRecursion == 0)
+        return true;
+    
     glm::vec3 lightDirection = glm::normalize(light->direction);
     float distanceToLight = FLT_MAX;
 
@@ -365,5 +368,16 @@ bool Tracer::isInLight(RayInfo traceInfo, Light *light)
     ray.origin = traceInfo.worldPosition;
     vector<Sphere *> spheres = *(scene->spheres);
     ClosestSphereInfo closest = findClosestSphere(ray, spheres, distanceToLight, const_cast<Sphere*>(reinterpret_cast<const Sphere*>(traceInfo.closestObject)));
+    if ((closest.closestSphere !=  nullptr) && (closest.closestSphere->type == Transparent))
+    {
+        glm::vec3 direction = ray.direction;
+        if (glm::dot(traceInfo.worldNormal, ray.direction) < 0)
+            direction *= -1;
+        
+        Ray newRay = calcSnellLaw(traceInfo, ray, traceInfo.worldNormal, direction, snellFrac);
+        traceInfo = traceRay(newRay, nullptr);
+        return isInLight(traceInfo, light, maxRecursion - 1, 1 / snellFrac);
+    }
+    
     return closest.closestSphere == nullptr;
 }

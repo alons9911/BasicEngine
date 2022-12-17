@@ -63,7 +63,7 @@ public:
     
     glm::vec3 getSphereColor(const Tracer::RayInfo &traceInfo, const Ray &ray);
     bool isBlackSquare(Plane* plane, glm::vec3 position);
-    bool isInLight(RayInfo traceInfo, Light *light);
+    bool isInLight(RayInfo traceInfo, Light *light, int maxRecursion, float snellFrac);
     Ray calcSnellLaw(Tracer::RayInfo traceInfo, Ray ray, glm::vec3 N, glm::vec3 rayDirection, float snellFrac);
 
 
