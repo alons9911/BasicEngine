@@ -1,6 +1,8 @@
 #include "game.h"
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
+#include "Tracer.cpp"
+#include "parser.cpp"
 
 static void printMat(const glm::mat4 mat)
 {
@@ -26,9 +28,16 @@ void Game::Init()
 
 	AddShader("../res/shaders/pickingShader");	
 	AddShader("../res/shaders/basicShader");
-	
-	AddTexture("../res/textures/box0.bmp",false);
 
+	SceneDesription sc = parseInputFile("../res/scene.txt");
+	printParsedInput(sc);
+
+	Tracer *tracer = new Tracer();
+	tracer->render(&sc);
+	unsigned char *data = tracer->getImageData();
+
+	AddTexture(800, 800, data);
+	
 	AddShape(Plane,-1,TRIANGLES);
 	
 	pickedShape = 0;
