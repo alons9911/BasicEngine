@@ -14,5 +14,8 @@ public:
 	void WhenTranslate();
 	void Motion();
 	~Game(void);
+
+	void AddBezier1DShape(Shape* bezier_1D, int parent);
+
 };
 
