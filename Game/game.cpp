@@ -1,6 +1,7 @@
 #include "game.h"
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
+#include "./Bezier1D.cpp"
 
 static void printMat(const glm::mat4 mat)
 {
@@ -36,6 +37,14 @@ void Game::Init()
 	SetShapeTex(0,0);
 	MoveCamera(0,zTranslate,10);
 	pickedShape = -1;
+
+	Bezier1D *bezier = new Bezier1D(3, 91, this);
+
+	bezier->SetMesh(bezier->GetLine());
+    AddBezier1DShape(bezier, -1);
+    SetShapeTex(shapes.size() - 1, 1);
+
+    MoveCamera(0, Scene::zTranslate, 50);
 	
 	//ReadPixel(); //uncomment when you are reading from the z-buffer
 }
@@ -55,6 +64,12 @@ void Game::Update(const glm::mat4 &MVP,const glm::mat4 &Model,const int  shaderI
 	else 
 		s->SetUniform4f("lightColor",0.7f,0.8f,0.1f,1.0f);
 	s->Unbind();
+}
+
+void Game::AddBezier1DShape(Shape* bezier_1D_line, int parent)
+{
+	chainParents.push_back(parent);
+	shapes.push_back(bezier_1D_line);
 }
 
 void Game::WhenRotate()

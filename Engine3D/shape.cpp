@@ -2,6 +2,17 @@
 #include "shape.h"
 
 
+Shape::Shape()
+{
+	mesh = nullptr;
+	//tex = shape.tex;
+	isCopy = true;
+	this->mode = -1;
+	toRender = true;
+	texID = -1;
+	shaderID = 1;
+}
+
 Shape::Shape(const Shape& shape,unsigned int mode)
 {
 	

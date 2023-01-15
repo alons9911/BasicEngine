@@ -59,6 +59,8 @@ public:
 	void UpdatePosition(float xpos, float ypos);
 	void MouseProccessing(int button);
 	bool inline IsActive() const { return isActive;} 
+
+	std::vector<Shape*> *getShapes() {return &shapes;}
 	
 	inline void SetShapeTex(int shpIndx,int texIndx){shapes[shpIndx]->SetTexture(texIndx);} 
 	inline void SetShapeShader(int shpIndx,int shdrIndx){shapes[shpIndx]->SetShader(shdrIndx);} 
