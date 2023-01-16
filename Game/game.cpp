@@ -28,23 +28,21 @@ void Game::Init()
 	AddShader("../res/shaders/pickingShader");	
 	AddShader("../res/shaders/basicShader");
 	
-	AddTexture("../res/textures/box0.bmp",false);
 
-	AddShape(Plane,-1,TRIANGLES);
 	
 	pickedShape = 0;
 	
-	SetShapeTex(0,0);
-	MoveCamera(0,zTranslate,10);
+	//MoveCamera(0,zTranslate,10);
 	pickedShape = -1;
 
 	Bezier1D *bezier = new Bezier1D(3, 91, this);
+	bezier->Init(this);
 
-	bezier->SetMesh(bezier->GetLine());
+	//bezier->SetMesh(bezier->GetLine());
     AddBezier1DShape(bezier, -1);
-    SetShapeTex(shapes.size() - 1, 1);
+    //SetShapeTex(shapes.size() - 1, 1);
 
-    MoveCamera(0, Scene::zTranslate, 50);
+    MoveCamera(0, zTranslate, -100);
 	
 	//ReadPixel(); //uncomment when you are reading from the z-buffer
 }

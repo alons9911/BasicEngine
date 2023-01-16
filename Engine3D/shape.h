@@ -50,6 +50,5 @@ public:
 	virtual ~Shape(void);
 
 	void SetMesh(const IndexedModel model) { this->mesh = new MeshConstructor(model, false); }
-
 };
 
