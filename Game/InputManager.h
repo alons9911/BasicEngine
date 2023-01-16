@@ -38,7 +38,21 @@
 					else
 						scn->Activate();
 				break;
-
+				case GLFW_KEY_2:
+					scn->getBezier()->NumberOfSegmentsToDisplay(2);
+					break;
+				case GLFW_KEY_3:
+					scn->getBezier()->NumberOfSegmentsToDisplay(3);
+					break;
+				case GLFW_KEY_4:
+					scn->getBezier()->NumberOfSegmentsToDisplay(4);
+					break;
+				case GLFW_KEY_5:
+					scn->getBezier()->NumberOfSegmentsToDisplay(5);
+					break;
+				case GLFW_KEY_6:
+					scn->getBezier()->NumberOfSegmentsToDisplay(6);
+					break;
 				case GLFW_KEY_UP:
 					scn->MoveCamera(0,scn->zTranslate,0.4f);
 					break;

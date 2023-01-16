@@ -29,8 +29,8 @@ public:
 
 
 
-	glm::vec4 GetPointOnCurve(int segment, int t); //returns point on curve in the requested segment for the value of t
-	glm::vec3 GetVelosity(int segment, int t); //returns the derivative of the curve in the requested segment for the value of t
+	glm::vec4 GetPointOnCurve(int segment, float t); //returns point on curve in the requested segment for the value of t
+	glm::vec3 GetVelosity(int segment, float t); //returns the derivative of the curve in the requested segment for the value of t
 
 	void AddSegment(glm::vec4 p1, glm::vec4 p2, glm::vec4 p3);  // adds a segment at the end of the curve
 	void AddFirstSegment(glm::vec4 p0, glm::vec4 p1, glm::vec4 p2, glm::vec4 p3);

@@ -39,7 +39,8 @@ void Bezier1D::Init(Scene *scn)
         cout << i << endl;
         scn->AddShape(Scene::Octahedron, -1, Scene::TRIANGLES);
         scn->SetShapeTex(shape_index, 0);
-        (*shapes)[shape_index]->MyScale(glm::vec3(0.5, 0.5, 0.5));
+        (*shapes)[shape_index]->MyScale(glm::vec3(0.25, 0.25, 0.25));
+
         //(*shapes)[shape_index]->MyTranslate(glm::vec3((float)i, 0.5, 0.5), 0);
         (*shapes)[shape_index]->Hide();
         shape_index++;
@@ -279,7 +280,7 @@ glm::vec4 Bezier1D::GetControlPoint(int segment, int indx) const
     return segments[segmentsNum - 1][3];
 }
 
-glm::vec4 Bezier1D::GetPointOnCurve(int segment, int t)
+glm::vec4 Bezier1D::GetPointOnCurve(int segment, float t)
 {
     // Cubic:
     // b(t) = (1-t)^3 * b_0 + 3(1-t)^2 * t * b_1 + 3(1-t) * t^2 * b_2 + t^3 * b_3
@@ -294,7 +295,7 @@ glm::vec4 Bezier1D::GetPointOnCurve(int segment, int t)
     return a_0 * b[0] + a_1 * b[1] + a_2 * b[2] + a_3 * b[3];
 }
 
-glm::vec3 Bezier1D::GetVelosity(int segment, int t)
+glm::vec3 Bezier1D::GetVelosity(int segment, float t)
 {
     // Cubic:
     // v(t) = b'(t) = -3(1-t)^2 * b_0 + (3(1-t)^2 - 6(1-t)t) * b_1  + (6t(1-t) - 3t^2) * b_2 + 3t^2 * b_3
@@ -308,6 +309,7 @@ glm::vec3 Bezier1D::GetVelosity(int segment, int t)
 
     glm::vec4 res = a_0 * b[0] + a_1 * b[1] + a_2 * b[2] + a_3 * b[3];
     glm::vec3 a(res.x, res.y, res.z);
+    cout << "t: "<<t<<", v: " << a.x <<","<<a.y<<","<<a.z<<endl;
     return a;
 }
 

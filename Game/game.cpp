@@ -35,14 +35,14 @@ void Game::Init()
 	//MoveCamera(0,zTranslate,10);
 	pickedShape = -1;
 
-	Bezier1D *bezier = new Bezier1D(3, 91, this);
+	bezier = new Bezier1D(3, 91, this);
 	bezier->Init(this);
 
 	//bezier->SetMesh(bezier->GetLine());
     AddBezier1DShape(bezier, -1);
     //SetShapeTex(shapes.size() - 1, 1);
 
-    MoveCamera(0, zTranslate, -100);
+    MoveCamera(0, zTranslate, 40);
 	
 	//ReadPixel(); //uncomment when you are reading from the z-buffer
 }
@@ -69,6 +69,7 @@ void Game::AddBezier1DShape(Shape* bezier_1D_line, int parent)
 	chainParents.push_back(parent);
 	shapes.push_back(bezier_1D_line);
 }
+
 
 void Game::WhenRotate()
 {

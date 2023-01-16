@@ -1,5 +1,6 @@
 #pragma once
 #include "scene.h"
+#include "Bezier1D.h"
 
 class Game : public Scene
 {
@@ -16,6 +17,10 @@ public:
 	~Game(void);
 
 	void AddBezier1DShape(Shape* bezier_1D, int parent);
+	Bezier1D *getBezier(){return bezier;}
+
+private:
+	Bezier1D *bezier;
 
 };
 
