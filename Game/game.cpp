@@ -83,6 +83,7 @@ void Game::Motion()
 {
 	if(isActive)
 	{
+		bezier->MoveCube();
 	}
 }
 

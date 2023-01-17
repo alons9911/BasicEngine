@@ -16,6 +16,8 @@ class Bezier1D : public Shape
 	int first_point_indx, last_point_indx, cube_indx;
 	int number_of_octahedrons = (6 * 3) + 1;
 	vector<vector<glm::vec3>> conf;
+	int cube_point_position = 0, cube_direction = 1;
+	float cube_prev_angle = 0.0f;
 public:
 	Bezier1D();
 	Bezier1D(int segNum, int res,int mode, int viewport = 0);
@@ -26,9 +28,10 @@ public:
 	void UpdateCurveByShapes(); 
 
 	void NumberOfSegmentsToDisplay(int segNum);
+	void MoveCube();
 
 
-
+	Shape *GetCube(){return (*shapes)[cube_indx];}
 	glm::vec4 GetPointOnCurve(int segment, float t); //returns point on curve in the requested segment for the value of t
 	glm::vec3 GetVelosity(int segment, float t); //returns the derivative of the curve in the requested segment for the value of t
 

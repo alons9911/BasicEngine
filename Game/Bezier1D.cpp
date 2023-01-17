@@ -36,7 +36,6 @@ void Bezier1D::Init(Scene *scn)
     // Octahedrons
     for (int i = 0; i < number_of_octahedrons; i++)
     {
-        cout << i << endl;
         scn->AddShape(Scene::Octahedron, -1, Scene::TRIANGLES);
         scn->SetShapeTex(shape_index, 0);
         (*shapes)[shape_index]->MyScale(glm::vec3(0.25, 0.25, 0.25));
@@ -309,8 +308,48 @@ glm::vec3 Bezier1D::GetVelosity(int segment, float t)
 
     glm::vec4 res = a_0 * b[0] + a_1 * b[1] + a_2 * b[2] + a_3 * b[3];
     glm::vec3 a(res.x, res.y, res.z);
-    cout << "t: "<<t<<", v: " << a.x <<","<<a.y<<","<<a.z<<endl;
+    //cout << "t: "<<t<<", v: " << a.x <<","<<a.y<<","<<a.z<<endl;
     return a;
+}
+
+void Bezier1D::MoveCube()
+{
+    int prev_cube_position = cube_point_position;
+    cube_point_position += cube_direction;
+
+    int num_of_dots_on_line = 10 * ((resT - 1) / segmentsNum);
+    if (cube_point_position == 0 || cube_point_position == 10 * (resT - 1))
+    {
+        cube_direction *= -1;
+    }
+    
+    float t = fmod((1.f / (float)num_of_dots_on_line) * (cube_point_position + 1), 1.0f);
+    float prev_t = fmod((1.f / (float)num_of_dots_on_line) * (prev_cube_position + 1), 1.0f);
+
+    int cube_segment = cube_point_position / num_of_dots_on_line,
+        prev_cube_segment = prev_cube_position / num_of_dots_on_line;
+
+    cout << "segment: "<< cube_segment << ", point: " << cube_point_position << 
+            ", prev_segment: "<< prev_cube_segment << ", prev_point: " << prev_cube_position << 
+            ", direction: "<< cube_direction << endl;
+
+    glm::vec4 p_t = GetPointOnCurve(cube_segment, t);
+    glm::vec4 prev_p_t = GetPointOnCurve(prev_cube_segment, prev_t);
+
+    glm::vec3 dt = GetVelosity(cube_segment, t);
+
+    glm::vec3 position(p_t.x, p_t.y, p_t.z);
+
+
+    GetCube()->MyTranslate(position - glm::vec3(prev_p_t.x, prev_p_t.y, prev_p_t.z),1);
+    
+    float rotation_angle = glm::degrees(glm::atan((float)dt.y / (float)dt.x));
+    float relative_rotation_angle = rotation_angle - cube_prev_angle;
+    cube_prev_angle = rotation_angle;
+    cout << "alpha: " << relative_rotation_angle << endl;
+    //GetCube()->MyRotate(rotation_angle, glm::vec3(0.0f, 0.0f, 1.0f), 0);
+    //GetCube()->RotateRelative(rotation_angle, glm::vec3(0.0f, 0.0f, 1.0f));
+    GetCube()->RotateInPlace(relative_rotation_angle, position, glm::vec3(0.0f, 0.0f, 1.0f));
 }
 
 void Bezier1D::SplitSegment(int segment, int t)

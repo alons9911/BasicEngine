@@ -27,7 +27,7 @@ glm::mat4 MovableGLM::MakeTrans(const glm::mat4 &prevTransformations) const
 
 glm::mat4 MovableGLM::MakeTrans() const
 {
-	return   rot * trans * scl;
+	return  trans * scl * rot;
 }
 
 void MovableGLM::MyTranslate(glm::vec3 delta,int mode)
@@ -39,7 +39,24 @@ void  MovableGLM::MyRotate(float angle,const glm::vec3 &vec,int mode)
 {
 	rot = glm::rotate(rot,angle,vec);
 }
-	
+
+glm::mat3 MovableGLM::GetTransposedRot() {
+	glm::mat3 transposed_rot = glm::mat3(
+		glm::vec3(rot[0][0], rot[0][1], rot[0][2]),
+		glm::vec3(rot[1][0], rot[1][1], rot[1][2]),
+		glm::vec3(rot[2][0], rot[2][1], rot[2][2])
+    );
+	return transposed_rot;
+}
+
+void MovableGLM::RotateRelative(float angle, const glm::vec3& vec) {
+	MyRotate(angle, vec * GetTransposedRot(), 0);
+}
+void MovableGLM::RotateInPlace(float angle, const glm::vec3& pos, const glm::vec3& vec) {
+	MyTranslate(-1.0f * pos, 0);
+	MyRotate(angle, vec, 0);
+	MyTranslate(pos, 0);
+}	
 void  MovableGLM::MyScale(glm::vec3 scale)
 {
 	scl = glm::scale(scl,scale);

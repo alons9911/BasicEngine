@@ -20,6 +20,10 @@ public:
 	void SetRotate(glm::mat4 rot) { this->rot = rot; }
 	void SetScale(glm::mat4 scl) { this->scl = scl; }
 
+	void RotateRelative(float angle, const glm::vec3& vec);
+	glm::mat3 GetTransposedRot();
+	void RotateInPlace(float angle, const glm::vec3& pos, const glm::vec3& vec);
+
 
 private:
 	glm::mat4 trans;
