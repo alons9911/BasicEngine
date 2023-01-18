@@ -15,7 +15,7 @@ class Bezier1D : public Shape
 	vector<Shape*> *shapes;
 	int first_point_indx, last_point_indx, cube_indx;
 	int number_of_octahedrons = (6 * 3) + 1;
-	vector<vector<glm::vec3>> conf;
+	vector<vector<glm::vec3>> segmentsLocations;
 	int cube_point_position = 0, cube_direction = 1;
 	float cube_prev_angle = 0.0f;
 public:
@@ -26,13 +26,13 @@ public:
 	glm::vec4 GetControlPoint(int segment, int indx) const; //returns a control point in the requested segment. indx will be 0,1,2,3, for p0,p1,p2,p3
 	
 	void ResetCubePosition();
-	float GetT(int position);
+	float GetT(int position, int direction);
 	int GetNumOfDotsOnLine();
 
 	void UpdateCurveByShapes(); 
 
 
-	void NumberOfSegmentsToDisplay(int segNum);
+	void UpdateSegmentsNumber(int segNum);
 	void MoveCube();
 
 

@@ -74,20 +74,32 @@ void Game::MouseProccessing(int button)
 {
 	if(pickedShape == -1)
 	{
-		if(button == 1 )
-		{			
-			/*MyTranslate(glm::vec3(-xrel/20.0f,0,0),0);
-			MyTranslate(glm::vec3(0,yrel/20.0f,0),0);*/
-			
-			getBezier()->CurveUpdate(picked_point_indx, -1.0f * GetXRel() / 2.0f, GetYRel() / 2.0f, is_continuity);
-			WhenTranslate();
-		}
-		else
+		if (is_scene_mode)
 		{
-			getBezier()->CurveUpdateRotation(picked_point_indx, -1.0f * GetXRel() / 2.0f, GetYRel() / 2.0f, is_continuity);
-			/*MyRotate(xrel/2.0f,glm::vec3(1,0,0),0);
-			MyRotate(yrel/2.0f,glm::vec3(0,0,1),0);*/
-			WhenRotate();
+			if(button == 1 )
+			{			
+				MyTranslate(glm::vec3(-1 * GetXRel() / 20.0f, 0, 0), 0);
+				MyTranslate(glm::vec3(0, GetYRel() / 20.0f, 0), 0);
+				WhenTranslate();
+			}
+			else
+			{
+				MyRotate(GetXRel() / 2.0f, glm::vec3(1,0,0), 0);
+				MyRotate(GetYRel() / 2.0f, glm::vec3(0,0,1), 0);
+				WhenRotate();
+			}
+		} 
+		else{
+			if(button == 1 )
+			{			
+				getBezier()->CurveUpdate(picked_point_indx, -1.0f * GetXRel() / 2.0f, GetYRel() / 2.0f, is_continuity);
+				WhenTranslate();
+			}
+			else
+			{
+				getBezier()->CurveUpdateRotation(picked_point_indx, -1.0f * GetXRel() / 2.0f, GetYRel() / 2.0f, is_continuity);
+				WhenRotate();
+			}
 		}
 	}
 }

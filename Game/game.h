@@ -24,11 +24,13 @@ public:
 	void decreasePickedPoint();
 
 	void changeContinuity() {is_continuity = !is_continuity;}
+	void changeSceneMode() {is_scene_mode = !is_scene_mode;}
 
 
 private:
 	Bezier1D *bezier;
 	int picked_point_indx = 0;
 	bool is_continuity = false;
+	bool is_scene_mode = false;
 };
 

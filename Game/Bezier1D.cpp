@@ -1,4 +1,5 @@
 #include "./Bezier1D.h"
+#include "./BezierConfig.h"
 #include <iostream>
 using namespace std;
 
@@ -20,11 +21,7 @@ Bezier1D::Bezier1D(int segNum, int res, Scene *scn, int viewport)
     this->setMode(Scene::LINE_STRIP);
 
     shapes = scn->getShapes();
-
-    // Cube + Octahedrons texture
     scn->AddTexture("../res/textures/box0.bmp", false);
-
-    // Bezier 1D texture
     scn->AddTexture("../res/textures/grass.bmp", false);
 }
 
@@ -39,8 +36,6 @@ void Bezier1D::Init(Scene *scn)
         scn->AddShape(Scene::Octahedron, -1, Scene::TRIANGLES);
         scn->SetShapeTex(shape_index, 0);
         (*shapes)[shape_index]->MyScale(glm::vec3(0.25, 0.25, 0.25));
-
-        //(*shapes)[shape_index]->MyTranslate(glm::vec3((float)i, 0.5, 0.5), 0);
         (*shapes)[shape_index]->Hide();
         shape_index++;
     }
@@ -59,105 +54,14 @@ void Bezier1D::Init(Scene *scn)
     for (int i = 4; i < number_of_octahedrons; i += 3)
         AddSegment(zero_vector, zero_vector, zero_vector);
 
-    // Configurations
-    std::vector<glm::vec3> config2;
-    config2.resize(7);
-    config2[0] = glm::vec3(-9, -9, 0);
-    config2[1] = glm::vec3(-9, -3, 0);
-    config2[2] = glm::vec3(-6, 0, 0);
-    config2[3] = glm::vec3(0, 0, 0);
-    config2[4] = glm::vec3(6, 0, 0);
-    config2[5] = glm::vec3(9, -3, 0);
-    config2[6] = glm::vec3(9, -9, 0);
-
-    std::vector<glm::vec3> config3;
-    config3.resize(10);
-    config3[0] = glm::vec3(-15, -9, 0);
-    config3[1] = glm::vec3(-15, -3, 0);
-    config3[2] = glm::vec3(-12, 0, 0);
-    config3[3] = glm::vec3(-6, 0, 0);
-    config3[4] = glm::vec3(-3, 0, 0);
-    config3[5] = glm::vec3(3, 0, 0);
-    config3[6] = glm::vec3(6, 0, 0);
-    config3[7] = glm::vec3(12, 0, 0);
-    config3[8] = glm::vec3(15, -3, 0);
-    config3[9] = glm::vec3(15, -9, 0);
-
-    std::vector<glm::vec3> config4;
-    config4.resize(13);
-    config4[0] = glm::vec3(-21, -9, 0);
-    config4[1] = glm::vec3(-21, -3, 0);
-    config4[2] = glm::vec3(-18, 0, 0);
-    config4[3] = glm::vec3(-12, 0, 0);
-    config4[4] = glm::vec3(-9, 0, 0);
-    config4[5] = glm::vec3(-3, 0, 0);
-    config4[6] = glm::vec3(0, 0, 0);
-    config4[7] = glm::vec3(3, 0, 0);
-    config4[8] = glm::vec3(9, 0, 0);
-    config4[9] = glm::vec3(12, 0, 0);
-    config4[10] = glm::vec3(18, 0, 0);
-    config4[11] = glm::vec3(21, -3, 0);
-    config4[12] = glm::vec3(21, -9, 0);
-
-    std::vector<glm::vec3> config5;
-    config5.resize(16);
-    config5[0] = glm::vec3(-27, -9, 0);
-    config5[1] = glm::vec3(-27, -3, 0);
-    config5[2] = glm::vec3(-24, 0, 0);
-    config5[3] = glm::vec3(-18, 0, 0);
-    config5[4] = glm::vec3(-15, 0, 0);
-    config5[5] = glm::vec3(-9, 0, 0);
-    config5[6] = glm::vec3(-6, 0, 0);
-    config5[7] = glm::vec3(-3, 0, 0);
-    config5[8] = glm::vec3(3, 0, 0);
-    config5[9] = glm::vec3(6, 0, 0);
-    config5[10] = glm::vec3(9, 0, 0);
-    config5[11] = glm::vec3(15, 0, 0);
-    config5[12] = glm::vec3(18, 0, 0);
-    config5[13] = glm::vec3(24, 0, 0);
-    config5[14] = glm::vec3(27, -3, 0);
-    config5[15] = glm::vec3(27, -9, 0);
-
-    std::vector<glm::vec3> config6;
-    config6.resize(19);
-    config6[0] = glm::vec3(-33, -9, 0);
-    config6[1] = glm::vec3(-33, -3, 0);
-    config6[2] = glm::vec3(-30, 0, 0);
-
-    config6[3] = glm::vec3(-24, 0, 0);
-    config6[4] = glm::vec3(-21, 0, 0);
-    config6[5] = glm::vec3(-15, 0, 0);
-
-    config6[6] = glm::vec3(-12, 0, 0);
-    config6[7] = glm::vec3(-9, 0, 0);
-    config6[8] = glm::vec3(-3, 0, 0);
-    config6[9] = glm::vec3(0, 0, 0);
-    config6[10] = glm::vec3(3, 0, 0);
-    config6[11] = glm::vec3(9, 0, 0);
-    config6[12] = glm::vec3(12, 0, 0);
-
-    config6[13] = glm::vec3(15, 0, 0);
-    config6[14] = glm::vec3(21, 0, 0);
-    config6[15] = glm::vec3(24, 0, 0);
-
-    config6[16] = glm::vec3(30, 0, 0);
-    config6[17] = glm::vec3(33, -3, 0);
-    config6[18] = glm::vec3(33, -9, 0);
-
-    // Add all configs
-    conf.push_back(config2);
-    conf.push_back(config3);
-    conf.push_back(config4);
-    conf.push_back(config5);
-    conf.push_back(config6);
+    segmentsLocations = getSegmentsLocations();
 
     ResetCurve(segmentsNum);
 
 }
 
-///////
 
-void Bezier1D::NumberOfSegmentsToDisplay(int segNum)
+void Bezier1D::UpdateSegmentsNumber(int segNum)
 {
     int res = ((resT - 1) / segmentsNum * segNum) + 1;
     segmentsNum = segNum;
@@ -166,24 +70,22 @@ void Bezier1D::NumberOfSegmentsToDisplay(int segNum)
     int config_num = segNum - 2;
 
     // Reset Cube position
-    glm::vec3 cube_new_position = conf[config_num][0];
+    glm::vec3 cube_new_position = segmentsLocations[config_num][0];
     glm::vec4 cube_old_position = (*shapes)[cube_indx]->GetTranslate()[3];
-    glm::vec3 movement = cube_new_position - glm::vec3(cube_old_position.x, cube_old_position.y, cube_old_position.z);
-    (*shapes)[cube_indx]->MyTranslate(movement, 0);
+    glm::vec3 loaction_delta = cube_new_position - glm::vec3(cube_old_position.x, cube_old_position.y, cube_old_position.z);
+    (*shapes)[cube_indx]->MyTranslate(loaction_delta, 0);
     (*shapes)[cube_indx]->SetRotateInPlace(glm::mat4(1));
     (*shapes)[cube_indx]->SetRotateNotInPlace(glm::mat4(1));
 
     for (int i = 0; i < number_of_octahedrons; i++)
     {
-        if (i < conf[config_num].size())
+        if (i < segmentsLocations[config_num].size())
         {
             (*shapes)[i]->Unhide();
-
-            // Reset Octahedrons posotions
-            glm::vec3 point_new_position = conf[config_num][i];
+            glm::vec3 point_new_position = segmentsLocations[config_num][i];
             glm::vec4 point_old_position = (*shapes)[i]->GetTranslate()[3];
-            glm::vec3 movement = point_new_position - glm::vec3(point_old_position.x, point_old_position.y, point_old_position.z);
-            (*shapes)[i]->MyTranslate(movement, 0);
+            glm::vec3 loaction_delta = point_new_position - glm::vec3(point_old_position.x, point_old_position.y, point_old_position.z);
+            (*shapes)[i]->MyTranslate(loaction_delta, 0);
         }
         else
         {
@@ -191,7 +93,7 @@ void Bezier1D::NumberOfSegmentsToDisplay(int segNum)
         }
     }
 
-    last_point_indx = conf[config_num].size() - 1;
+    last_point_indx = segmentsLocations[config_num].size() - 1;
     UpdateCurveByShapes();
     this->SetMesh(GetLine());
 }
@@ -204,26 +106,22 @@ void Bezier1D::UpdateCurveByShapes()
     glm::vec4 p3 = (*shapes)[3]->GetTranslate()[3];
     ChangeFirstSegment(p0, p1, p2, p3);
 
-    int segIndx = 1;
+    int segment_indx = 1;
     for (int i = 4; i < shapes->size() - 2; i += 3) {
         glm::vec4 p1 = (*shapes)[i]->GetTranslate()[3];
         glm::vec4 p2 = (*shapes)[i + 1]->GetTranslate()[3];
         glm::vec4 p3 = (*shapes)[i + 2]->GetTranslate()[3];
 
-        ChangeSegment(segIndx, p1, p2, p3);
-        segIndx++;
+        ChangeSegment(segment_indx, p1, p2, p3);
+        segment_indx++;
     }
     SetMesh(GetLine());
 }
 
-///////
 
 IndexedModel Bezier1D::GetLine()
 {
     IndexedModel model;
-
-    ///
-
     int num_of_dots_on_line = (resT - 1) / segmentsNum;
 
     for (int i = 0; i < resT; i++)
@@ -239,32 +137,20 @@ IndexedModel Bezier1D::GetLine()
         for (int j = 0; j < num_of_dots_on_line; j++)
         {
             float t = (1.f / (float)num_of_dots_on_line) * (j + 1);
-            glm::vec4 p_t = GetPointOnCurve(i, t);
+            glm::vec4 point = GetPointOnCurve(i, t);
 
-            // Normal to the Curve (2D)
-            glm::vec3 dt = GetVelosity(i, t);
-            float sqrt_t = sqrt(pow(dt.x, 2) + pow(dt.y, 2));
-            glm::vec3 normal = glm::vec3(-dt.y / sqrt_t, dt.x / sqrt_t, 0);
+            glm::vec3 vel = GetVelosity(i, t);
+            float sqrt_t = sqrt(pow(vel.x, 2) + pow(vel.y, 2));
+            glm::vec3 normal = glm::vec3(-vel.y / sqrt_t, vel.x / sqrt_t, 0);
 
-            model.positions.push_back(glm::vec3(p_t.x, p_t.y, p_t.z));
-            model.colors.push_back(glm::vec3(1.f, 1.f, 1.f));
+            model.positions.push_back(glm::vec3(point.x, point.y, point.z));
             model.normals.push_back(normal);
+            model.colors.push_back(glm::vec3(1.f, 1.f, 1.f));
         }
     }
-
-    ///
-
     return model;
 }
 
-
-///// 
-
-
-
-
-
-/////
 
 glm::vec4 Bezier1D::GetControlPoint(int segment, int indx) const
 {
@@ -306,9 +192,10 @@ glm::vec3 Bezier1D::GetVelosity(int segment, float t)
     return a;
 }
 
-float Bezier1D::GetT(int position){
-    int num_of_dots_on_line = 10 * ((resT - 1) / segmentsNum);
-    return fmod((1.f / (float)num_of_dots_on_line) * (position + 1), 1.0f);
+float Bezier1D::GetT(int position, int direction){
+    int num_of_dots_on_line = GetNumOfDotsOnLine();
+    float t = (1.0f / (float)num_of_dots_on_line) * (position + 1);
+    return fmod(t, 1.0f);
 }
 
 int Bezier1D::GetNumOfDotsOnLine(){
@@ -321,54 +208,66 @@ void Bezier1D::MoveCube()
     cube_point_position += cube_direction;
 
     int num_of_dots_on_line = GetNumOfDotsOnLine();
-    if (cube_point_position == 0 || cube_point_position == 10 * (resT - 1))
+    if ((cube_point_position <= 0 && cube_direction == -1) || 
+        (cube_point_position >= 10 * (resT - 1) && cube_direction == 1))
     {
         cube_direction *= -1;
     }
     
-    float t = GetT(cube_point_position);
-    float prev_t = GetT(prev_cube_position);
+    float t = GetT(cube_point_position, cube_direction);
+    if (t == 0.0f)
+    {
+        if (cube_direction == 1)
+            cube_point_position++;
+        else
+            cube_point_position--;
+        
+        MoveCube();
+        return;
+    }
+    
+    float prev_t = GetT(prev_cube_position, cube_direction);
 
     int cube_segment = cube_point_position / num_of_dots_on_line,
         prev_cube_segment = prev_cube_position / num_of_dots_on_line;
 
-    cout << "segment: "<< cube_segment << ", point: " << cube_point_position << 
+    /*cout << "segment: "<< cube_segment << ", point: " << cube_point_position << 
             ", prev_segment: "<< prev_cube_segment << ", prev_point: " << prev_cube_position << 
-            ", direction: "<< cube_direction << endl;
+            ", direction: "<< cube_direction << endl;*/
 
-    glm::vec4 p_t = GetPointOnCurve(cube_segment, t);
+    glm::vec4 point = GetPointOnCurve(cube_segment, t);
     glm::vec4 prev_p_t = GetPointOnCurve(prev_cube_segment, prev_t);
 
-    glm::vec3 dt = GetVelosity(cube_segment, t);
+    glm::vec3 vel = GetVelosity(cube_segment, t);
 
-    glm::vec3 position(p_t.x, p_t.y, p_t.z);
+    glm::vec3 position(point.x, point.y, point.z);
     glm::vec3 prev_position(prev_p_t.x, prev_p_t.y, prev_p_t.z);
 
     GetCube()->MyTranslate(position - prev_position,1);
     
-    float rotation_angle = glm::degrees(glm::atan((float)dt.y / (float)dt.x));
+    float rotation_angle = glm::degrees(glm::atan((float)vel.y / (float)vel.x));
     float relative_rotation_angle = rotation_angle - cube_prev_angle;
     cube_prev_angle = rotation_angle;
-    cout << "alpha: " << relative_rotation_angle << endl;
+    //cout << "alpha: " << relative_rotation_angle << endl;
     GetCube()->RotateRelative(relative_rotation_angle, position, glm::vec3(0.0f, 0.0f, 1.0f), 0);
 }
 
 void Bezier1D::ResetCubePosition(){
     
-    glm::vec4 p_t = GetPointOnCurve(0, 0);
-    float prev_t = GetT(cube_point_position);
+    glm::vec4 point = GetPointOnCurve(0, 0);
+    float prev_t = GetT(cube_point_position, 1);
     int prev_cube_segment = cube_point_position / GetNumOfDotsOnLine();
     glm::vec4 prev_p_t = GetPointOnCurve(prev_cube_segment, prev_t);
 
 
-    glm::vec3 position(p_t.x, p_t.y, p_t.z);
+    glm::vec3 position(point.x, point.y, point.z);
     glm::vec3 prev_position(prev_p_t.x, prev_p_t.y, prev_p_t.z);
 
 
     GetCube()->MyTranslate(position - prev_position,1);
 
-    glm::vec3 dt = GetVelosity(0, 0);
-    float rotation_angle = glm::degrees(glm::atan((float)dt.y / (float)dt.x));
+    glm::vec3 vel = GetVelosity(0, 0);
+    float rotation_angle = glm::degrees(glm::atan((float)vel.y / (float)vel.x));
     float relative_rotation_angle = rotation_angle - cube_prev_angle;
     cube_prev_angle = rotation_angle;
     GetCube()->RotateRelative(relative_rotation_angle, position, glm::vec3(0.0f, 0.0f, 1.0f), 0);
@@ -393,10 +292,10 @@ void Bezier1D::AddSegment(glm::vec4 p1, glm::vec4 p2, glm::vec4 p3)
     segments.push_back(glm::mat4(p0, p1, p2, p3));
 }
 
-void Bezier1D::ChangeSegment(int segIndx, glm::vec4 p1, glm::vec4 p2, glm::vec4 p3)
+void Bezier1D::ChangeSegment(int segment_indx, glm::vec4 p1, glm::vec4 p2, glm::vec4 p3)
 {
-    glm::vec4 p0 = segments[segIndx - 1][3];
-    segments[segIndx] = glm::mat4(p0, p1, p2, p3);
+    glm::vec4 p0 = segments[segment_indx - 1][3];
+    segments[segment_indx] = glm::mat4(p0, p1, p2, p3);
 }
 
 void Bezier1D::ChangeFirstSegment(glm::vec4 p0, glm::vec4 p1, glm::vec4 p2, glm::vec4 p3)
@@ -559,7 +458,7 @@ void Bezier1D::ResetCurve(int segNum)
     {
         (*shapes)[i]->ResetTrans();
     }
-    NumberOfSegmentsToDisplay(segNum);
+    UpdateSegmentsNumber(segNum);
     
 }
 

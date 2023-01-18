@@ -86,6 +86,9 @@ using namespace std;
 				case GLFW_KEY_C:
 					scn->changeContinuity();
 					break;
+				case GLFW_KEY_S:
+					scn->changeSceneMode();
+					break;
 				case GLFW_KEY_UP:
 					scn->MoveCamera(0,scn->zTranslate,0.4f);
 					break;
