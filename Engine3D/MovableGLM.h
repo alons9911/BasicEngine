@@ -1,7 +1,7 @@
 #pragma once
 #include "../res/includes/glm/glm.hpp"
 
-class MovableGLM 
+class MovableGLM
 {
 public:
 	MovableGLM();
@@ -11,22 +11,24 @@ public:
 	void MyRotate(float angle, const glm::vec3 &vec, int mode);
 	void MyScale(glm::vec3 scale);
 	void ZeroTrans();
+	void ResetTrans();
 
-	glm::mat4 GetTranslate() { return trans; }
-	glm::mat4 GetRotate() { return rot; }
+
+	glm::mat4 GetTranslate() { return rot_not_in_place * trans; }
+	glm::mat4 GetRotate() { return rot_in_place; }
 	glm::mat4 GetScale() { return scl; }
 
 	void SetTranslate(glm::mat4 trans) { this->trans = trans; }
-	void SetRotate(glm::mat4 rot) { this->rot = rot; }
+	void SetRotateInPlace(glm::mat4 rot) { this->rot_in_place = rot; }
+	void SetRotateNotInPlace(glm::mat4 rot) { this->rot_not_in_place = rot; }
 	void SetScale(glm::mat4 scl) { this->scl = scl; }
 
-	void RotateRelative(float angle, const glm::vec3& vec);
 	glm::mat3 GetTransposedRot();
-	void RotateInPlace(float angle, const glm::vec3& pos, const glm::vec3& vec);
-
+	void RotateRelative(float angle, const glm::vec3 &pos, const glm::vec3 &vec, int mode);
 
 private:
 	glm::mat4 trans;
-	glm::mat4 rot;
+	glm::mat4 rot_in_place;
+	glm::mat4 rot_not_in_place;
 	glm::mat4 scl;
 };

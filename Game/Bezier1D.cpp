@@ -151,7 +151,7 @@ void Bezier1D::Init(Scene *scn)
     conf.push_back(config5);
     conf.push_back(config6);
 
-    NumberOfSegmentsToDisplay(segmentsNum);
+    ResetCurve(segmentsNum);
 
 }
 
@@ -170,7 +170,8 @@ void Bezier1D::NumberOfSegmentsToDisplay(int segNum)
     glm::vec4 cube_old_position = (*shapes)[cube_indx]->GetTranslate()[3];
     glm::vec3 movement = cube_new_position - glm::vec3(cube_old_position.x, cube_old_position.y, cube_old_position.z);
     (*shapes)[cube_indx]->MyTranslate(movement, 0);
-    (*shapes)[cube_indx]->SetRotate(glm::mat4(1));
+    (*shapes)[cube_indx]->SetRotateInPlace(glm::mat4(1));
+    (*shapes)[cube_indx]->SetRotateNotInPlace(glm::mat4(1));
 
     for (int i = 0; i < number_of_octahedrons; i++)
     {
@@ -224,13 +225,6 @@ IndexedModel Bezier1D::GetLine()
     ///
 
     int num_of_dots_on_line = (resT - 1) / segmentsNum;
-
-    // Verifying that resT value is valid
-    if ((resT - 1) % segmentsNum != 0)
-    {
-        std::cout << "Error: 'resT' isn't divisible by 'segmentsNum' with a remainder of '1'!" << std::endl;
-        throw std::invalid_argument("");
-    }
 
     for (int i = 0; i < resT; i++)
     {
@@ -312,19 +306,28 @@ glm::vec3 Bezier1D::GetVelosity(int segment, float t)
     return a;
 }
 
+float Bezier1D::GetT(int position){
+    int num_of_dots_on_line = 10 * ((resT - 1) / segmentsNum);
+    return fmod((1.f / (float)num_of_dots_on_line) * (position + 1), 1.0f);
+}
+
+int Bezier1D::GetNumOfDotsOnLine(){
+    return 10 * ((resT - 1) / segmentsNum);
+}
+
 void Bezier1D::MoveCube()
 {
     int prev_cube_position = cube_point_position;
     cube_point_position += cube_direction;
 
-    int num_of_dots_on_line = 10 * ((resT - 1) / segmentsNum);
+    int num_of_dots_on_line = GetNumOfDotsOnLine();
     if (cube_point_position == 0 || cube_point_position == 10 * (resT - 1))
     {
         cube_direction *= -1;
     }
     
-    float t = fmod((1.f / (float)num_of_dots_on_line) * (cube_point_position + 1), 1.0f);
-    float prev_t = fmod((1.f / (float)num_of_dots_on_line) * (prev_cube_position + 1), 1.0f);
+    float t = GetT(cube_point_position);
+    float prev_t = GetT(prev_cube_position);
 
     int cube_segment = cube_point_position / num_of_dots_on_line,
         prev_cube_segment = prev_cube_position / num_of_dots_on_line;
@@ -339,17 +342,39 @@ void Bezier1D::MoveCube()
     glm::vec3 dt = GetVelosity(cube_segment, t);
 
     glm::vec3 position(p_t.x, p_t.y, p_t.z);
+    glm::vec3 prev_position(prev_p_t.x, prev_p_t.y, prev_p_t.z);
 
-
-    GetCube()->MyTranslate(position - glm::vec3(prev_p_t.x, prev_p_t.y, prev_p_t.z),1);
+    GetCube()->MyTranslate(position - prev_position,1);
     
     float rotation_angle = glm::degrees(glm::atan((float)dt.y / (float)dt.x));
     float relative_rotation_angle = rotation_angle - cube_prev_angle;
     cube_prev_angle = rotation_angle;
     cout << "alpha: " << relative_rotation_angle << endl;
-    //GetCube()->MyRotate(rotation_angle, glm::vec3(0.0f, 0.0f, 1.0f), 0);
-    //GetCube()->RotateRelative(rotation_angle, glm::vec3(0.0f, 0.0f, 1.0f));
-    GetCube()->RotateInPlace(relative_rotation_angle, position, glm::vec3(0.0f, 0.0f, 1.0f));
+    GetCube()->RotateRelative(relative_rotation_angle, position, glm::vec3(0.0f, 0.0f, 1.0f), 0);
+}
+
+void Bezier1D::ResetCubePosition(){
+    
+    glm::vec4 p_t = GetPointOnCurve(0, 0);
+    float prev_t = GetT(cube_point_position);
+    int prev_cube_segment = cube_point_position / GetNumOfDotsOnLine();
+    glm::vec4 prev_p_t = GetPointOnCurve(prev_cube_segment, prev_t);
+
+
+    glm::vec3 position(p_t.x, p_t.y, p_t.z);
+    glm::vec3 prev_position(prev_p_t.x, prev_p_t.y, prev_p_t.z);
+
+
+    GetCube()->MyTranslate(position - prev_position,1);
+
+    glm::vec3 dt = GetVelosity(0, 0);
+    float rotation_angle = glm::degrees(glm::atan((float)dt.y / (float)dt.x));
+    float relative_rotation_angle = rotation_angle - cube_prev_angle;
+    cube_prev_angle = rotation_angle;
+    GetCube()->RotateRelative(relative_rotation_angle, position, glm::vec3(0.0f, 0.0f, 1.0f), 0);
+
+    cube_point_position = 0;
+    cube_direction = 1;
 }
 
 void Bezier1D::SplitSegment(int segment, int t)
@@ -381,15 +406,161 @@ void Bezier1D::ChangeFirstSegment(glm::vec4 p0, glm::vec4 p1, glm::vec4 p2, glm:
 
 float Bezier1D::MoveControlPoint(int segment, int indx, float dx, float dy, bool preserveC1)
 {
+    
     return 0; // not suppose to reach here
 }
 
 void Bezier1D::CurveUpdate(int pointIndx, float dx, float dy, bool preserveC1)
 {
+    if (pointIndx == 0)
+    {
+        (*shapes)[cube_indx]->MyTranslate(glm::vec3(dx, dy, 0.0f), 0);
+    }
+
+    int segment = 0;
+    if (pointIndx > 3)
+    {
+        segment = 1 + ((pointIndx - 4) / 3);
+    }
+    
+    int indx_in_segment = pointIndx;
+    if (segment != 0)
+    {
+        indx_in_segment = pointIndx - ((3 * segment) + 1) + 1;
+    }
+    if (preserveC1 && indx_in_segment == 2)
+    {
+        glm::vec4 p2_position = (*shapes)[pointIndx]->GetTranslate()[3];
+        glm::vec4 p3_position = (*shapes)[pointIndx + 1]->GetTranslate()[3];
+        glm::vec3 p3_pos(p3_position.x, p3_position.y, p3_position.z);
+        glm::vec3 p2_pos(p2_position.x, p2_position.y, p2_position.z);
+
+        glm::vec3 movement_vec = (p3_pos - p2_pos) * ((dx - dy) / 2);
+        
+        glm::vec3 dest = p2_pos + movement_vec;
+
+        if (glm::length(p3_pos - dest) > 0.5f)
+        {
+            (*shapes)[pointIndx]->MyTranslate(movement_vec, 0);
+        }
+        else{
+            (*shapes)[pointIndx]->MyTranslate((dest - movement_vec) - p2_pos, 0);
+        }
+    }
+    else if (preserveC1 && indx_in_segment == 1)
+    {
+        glm::vec4 p1_position = (*shapes)[pointIndx]->GetTranslate()[3];
+        glm::vec4 p0_position = (*shapes)[pointIndx - 1]->GetTranslate()[3];
+        glm::vec3 p0_pos(p0_position.x, p0_position.y, p0_position.z);
+        glm::vec3 p1_pos(p1_position.x, p1_position.y, p1_position.z);
+
+        glm::vec3 movement_vec = (p0_pos - p1_pos) * ((dx - dy) / 2);
+        
+        glm::vec3 dest = p1_pos + movement_vec;
+
+        if (glm::length(p0_pos - dest) > 0.5f)
+        {
+            (*shapes)[pointIndx]->MyTranslate(movement_vec, 0);
+        }
+        else{
+            (*shapes)[pointIndx]->MyTranslate((dest - movement_vec) - p1_pos, 0);
+        }
+    }
+    else
+    {
+        (*shapes)[pointIndx]->MyTranslate(glm::vec3(dx, dy, 0.0f), 0);
+    }
+    
+
+    UpdateCurveByShapes();
 }
+
+
+void Bezier1D::CurveUpdateRotation(int pointIndx, float dx, float dy, bool preserveC1)
+{
+    int segment = 0;
+    if (pointIndx > 3)
+    {
+        segment = 1 + ((pointIndx - 4) / 3);
+    }
+    
+    int indx_in_segment = pointIndx;
+    if (segment != 0)
+    {
+        indx_in_segment = pointIndx - ((3 * segment) + 1) + 1;
+    }
+
+    if (indx_in_segment == 3 && segment < segmentsNum - 1)
+    {
+        glm::vec4 p0_position = (*shapes)[pointIndx]->GetTranslate()[3];
+        glm::vec4 p1_position = (*shapes)[pointIndx + 1]->GetTranslate()[3];
+        glm::vec4 p2_prev_seg_position = (*shapes)[pointIndx - 1]->GetTranslate()[3];
+
+        glm::vec3 p0_pos(p0_position.x, p0_position.y, p0_position.z);
+        glm::vec3 p1_pos(p1_position.x, p1_position.y, p1_position.z);
+        glm::vec3 p2_prev_seg_pos(p2_prev_seg_position.x, p2_prev_seg_position.y, p2_prev_seg_position.z);
+
+        glm::vec3 movement_vec = p0_pos - p1_pos;
+        
+        float distance = -1 * glm::length(p0_pos - p2_prev_seg_pos);
+        float t = distance / glm::length(movement_vec);
+
+
+        glm::vec3 dest((1 - t) * p0_pos.x + t * p1_pos.x,
+                       (1 - t) * p0_pos.y + t * p1_pos.y,
+                       (1 - t) * p0_pos.z + t * p1_pos.z);
+        
+        movement_vec = dest - p2_prev_seg_pos;
+
+        (*shapes)[pointIndx - 1]->MyTranslate(movement_vec, 0);
+    }
+    
+    if (indx_in_segment == 2)
+    {
+        glm::vec4 p2_position = (*shapes)[pointIndx]->GetTranslate()[3];
+        glm::vec4 p3_position = (*shapes)[pointIndx + 1]->GetTranslate()[3];
+        glm::vec3 p3_pos(p3_position.x, p3_position.y, p3_position.z);
+        glm::vec3 p2_pos(p2_position.x, p2_position.y, p2_position.z);
+
+        float angle = 1.0f;
+        if (dx >= 0)
+            angle *= -1.0f;
+        
+
+        (*shapes)[pointIndx]->RotateRelative(angle, p3_pos, glm::vec3(0.0f, 0.0f, 1.0f),1);
+        if (preserveC1 && segment < segmentsNum - 1)
+            (*shapes)[pointIndx + 2]->RotateRelative(angle, p3_pos, glm::vec3(0.0f, 0.0f, 1.0f),1);
+    }
+    else if (indx_in_segment == 1)
+    {
+        glm::vec4 p1_position = (*shapes)[pointIndx]->GetTranslate()[3];
+        glm::vec4 p0_position = (*shapes)[pointIndx - 1]->GetTranslate()[3];
+        glm::vec3 p0_pos(p0_position.x, p0_position.y, p0_position.z);
+        glm::vec3 p1_pos(p1_position.x, p1_position.y, p1_position.z);
+
+        float angle = 1.0f;
+        if (dx >= 0)
+            angle *= -1.0f;
+        
+
+        (*shapes)[pointIndx]->RotateRelative(angle, p0_pos, glm::vec3(0.0f, 0.0f, 1.0f),1);
+        if (preserveC1 && segment > 0)
+            (*shapes)[pointIndx - 2]->RotateRelative(angle, p0_pos, glm::vec3(0.0f, 0.0f, 1.0f),1);
+    }
+    
+
+    UpdateCurveByShapes();
+}
+
 
 void Bezier1D::ResetCurve(int segNum)
 {
+    for (int i = 0; i < shapes->size(); i++)
+    {
+        (*shapes)[i]->ResetTrans();
+    }
+    NumberOfSegmentsToDisplay(segNum);
+    
 }
 
 Bezier1D::~Bezier1D(void)

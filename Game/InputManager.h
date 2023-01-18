@@ -1,6 +1,9 @@
 #pragma once   //maybe should be static class
 #include "display.h"
 #include "game.h"
+#include "scene.h"
+#include <iostream>
+using namespace std;
 
 
 	void mouse_callback(GLFWwindow* window,int button, int action, int mods)
@@ -12,6 +15,8 @@
 			glfwGetCursorPos(window,&x2,&y2);
 			scn->Picking((int)x2,(int)y2);
 		}
+		
+		
 	}
 	
 	void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
@@ -33,25 +38,53 @@
 					glfwSetWindowShouldClose(window,GLFW_TRUE);
 				break;
 				case GLFW_KEY_SPACE:
-					if(scn->IsActive())
+					if(scn->IsActive()){
 						scn->Deactivate();
-					else
+						scn->getBezier()->ResetCubePosition();
+					}else
 						scn->Activate();
 				break;
 				case GLFW_KEY_2:
-					scn->getBezier()->NumberOfSegmentsToDisplay(2);
+					scn->getBezier()->ResetCurve(2);
 					break;
 				case GLFW_KEY_3:
-					scn->getBezier()->NumberOfSegmentsToDisplay(3);
+					scn->getBezier()->ResetCurve(3);
 					break;
 				case GLFW_KEY_4:
-					scn->getBezier()->NumberOfSegmentsToDisplay(4);
+					scn->getBezier()->ResetCurve(4);
 					break;
 				case GLFW_KEY_5:
-					scn->getBezier()->NumberOfSegmentsToDisplay(5);
+					scn->getBezier()->ResetCurve(5);
 					break;
 				case GLFW_KEY_6:
-					scn->getBezier()->NumberOfSegmentsToDisplay(6);
+					scn->getBezier()->ResetCurve(6);
+					break;
+				case GLFW_KEY_R:
+					scn->MoveCamera(0, scn->xTranslate, 0.5f);
+					break;
+				case GLFW_KEY_L:
+					scn->MoveCamera(0, scn->xTranslate, -0.5f);
+					break;
+				case GLFW_KEY_U:
+					scn->MoveCamera(0, scn->yTranslate, 0.5f);
+					break;
+				case GLFW_KEY_D:
+					scn->MoveCamera(0, scn->yTranslate, -0.5f);
+					break;
+				case GLFW_KEY_B:
+					scn->MoveCamera(0, scn->zTranslate, 0.5f);
+					break;
+				case GLFW_KEY_F:
+					scn->MoveCamera(0, scn->zTranslate, -0.5f);
+					break;
+				case GLFW_KEY_RIGHT:
+					scn->increasePickedPoint();
+					break;
+				case GLFW_KEY_LEFT:
+					scn->decreasePickedPoint();
+					break;
+				case GLFW_KEY_C:
+					scn->changeContinuity();
 					break;
 				case GLFW_KEY_UP:
 					scn->MoveCamera(0,scn->zTranslate,0.4f);

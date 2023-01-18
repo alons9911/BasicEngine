@@ -25,7 +25,12 @@ public:
 	IndexedModel GetLine();	//generates a model for MeshConstructor Constructor with resT vertices. See Mesh.h/cpp for a IndexedModel defenition and how to intialize it
 	glm::vec4 GetControlPoint(int segment, int indx) const; //returns a control point in the requested segment. indx will be 0,1,2,3, for p0,p1,p2,p3
 	
+	void ResetCubePosition();
+	float GetT(int position);
+	int GetNumOfDotsOnLine();
+
 	void UpdateCurveByShapes(); 
+
 
 	void NumberOfSegmentsToDisplay(int segNum);
 	void MoveCube();
@@ -38,6 +43,7 @@ public:
 	void AddSegment(glm::vec4 p1, glm::vec4 p2, glm::vec4 p3);  // adds a segment at the end of the curve
 	void AddFirstSegment(glm::vec4 p0, glm::vec4 p1, glm::vec4 p2, glm::vec4 p3);
 	void CurveUpdate(int pointIndx, float dx, float dy, bool preserveC1 = false);  //changes the line in by using ChangeLine function of MeshConstructor and MoveControlPoint 
+	void CurveUpdateRotation(int pointIndx, float dx, float dy, bool preserveC1 = false);  //changes the line in by using ChangeLine function of MeshConstructor and MoveControlPoint 
 	void ChangeSegment(int segIndx, glm::vec4 p1, glm::vec4 p2, glm::vec4 p3); // changes three control point of a segment
 	void ChangeFirstSegment(glm::vec4 p0, glm::vec4 p1, glm::vec4 p2, glm::vec4 p3); // changes three control point of a segment
 	void SplitSegment(int segment, int t);

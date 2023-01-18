@@ -70,6 +70,38 @@ void Game::AddBezier1DShape(Shape* bezier_1D_line, int parent)
 	shapes.push_back(bezier_1D_line);
 }
 
+void Game::MouseProccessing(int button)
+{
+	if(pickedShape == -1)
+	{
+		if(button == 1 )
+		{			
+			/*MyTranslate(glm::vec3(-xrel/20.0f,0,0),0);
+			MyTranslate(glm::vec3(0,yrel/20.0f,0),0);*/
+			
+			getBezier()->CurveUpdate(picked_point_indx, -1.0f * GetXRel() / 2.0f, GetYRel() / 2.0f, is_continuity);
+			WhenTranslate();
+		}
+		else
+		{
+			getBezier()->CurveUpdateRotation(picked_point_indx, -1.0f * GetXRel() / 2.0f, GetYRel() / 2.0f, is_continuity);
+			/*MyRotate(xrel/2.0f,glm::vec3(1,0,0),0);
+			MyRotate(yrel/2.0f,glm::vec3(0,0,1),0);*/
+			WhenRotate();
+		}
+	}
+}
+
+void Game::increasePickedPoint()
+{
+	int max_point = getBezier()->GetSegmentsNum() * 3;
+	picked_point_indx = min(picked_point_indx + 1, max_point);
+}
+void Game::decreasePickedPoint()
+{
+	picked_point_indx = max(picked_point_indx - 1, 0);
+}
+
 
 void Game::WhenRotate()
 {
