@@ -59,6 +59,8 @@ public:
 	void UpdatePosition(float xpos, float ypos);
 	void MouseProccessing(int button);
 	bool inline IsActive() const { return isActive;} 
+
+	std::vector<Shape*> *getShapes() {return &shapes;}
 	
 	inline void SetShapeTex(int shpIndx,int texIndx){shapes[shpIndx]->SetTexture(texIndx);} 
 	inline void SetShapeShader(int shpIndx,int shdrIndx){shapes[shpIndx]->SetShader(shdrIndx);} 
@@ -72,6 +74,8 @@ private:
 	int cameraIndx;
 	void Clear(float r, float g, float b, float a);
 
+	glm::vec2 cursor_pos;
+
 protected:
 	std::vector<Shape*> shapes;
 	std::vector<Shader*> shaders;
@@ -81,5 +85,9 @@ protected:
 	int pickedShape;
 	
 	bool isActive;
+
+	int GetXRel() {return xrel;}
+	int GetYRel() {return yrel;}
+	glm::vec2 GetCursorPos();
 };
 

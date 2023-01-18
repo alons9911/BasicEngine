@@ -1,6 +1,7 @@
 #include "game.h"
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
+#include "./Bezier1D.cpp"
 
 static void printMat(const glm::mat4 mat)
 {
@@ -27,15 +28,21 @@ void Game::Init()
 	AddShader("../res/shaders/pickingShader");	
 	AddShader("../res/shaders/basicShader");
 	
-	AddTexture("../res/textures/box0.bmp",false);
 
-	AddShape(Plane,-1,TRIANGLES);
 	
 	pickedShape = 0;
 	
-	SetShapeTex(0,0);
-	MoveCamera(0,zTranslate,10);
+	//MoveCamera(0,zTranslate,10);
 	pickedShape = -1;
+
+	bezier = new Bezier1D(3, 91, this);
+	bezier->Init(this);
+
+	//bezier->SetMesh(bezier->GetLine());
+    AddBezier1DShape(bezier, -1);
+    //SetShapeTex(shapes.size() - 1, 1);
+
+    MoveCamera(0, zTranslate, 40);
 	
 	//ReadPixel(); //uncomment when you are reading from the z-buffer
 }
@@ -57,6 +64,57 @@ void Game::Update(const glm::mat4 &MVP,const glm::mat4 &Model,const int  shaderI
 	s->Unbind();
 }
 
+void Game::AddBezier1DShape(Shape* bezier_1D_line, int parent)
+{
+	chainParents.push_back(parent);
+	shapes.push_back(bezier_1D_line);
+}
+
+void Game::MouseProccessing(int button)
+{
+	if(pickedShape == -1)
+	{
+		if (is_scene_mode)
+		{
+			if(button == 1 )
+			{			
+				MyTranslate(glm::vec3(-1 * GetXRel() / 20.0f, 0, 0), 0);
+				MyTranslate(glm::vec3(0, GetYRel() / 20.0f, 0), 0);
+				WhenTranslate();
+			}
+			else
+			{
+				MyRotate(GetXRel() / 2.0f, glm::vec3(1,0,0), 0);
+				MyRotate(GetYRel() / 2.0f, glm::vec3(0,0,1), 0);
+				WhenRotate();
+			}
+		} 
+		else{
+			if(button == 1 )
+			{			
+				getBezier()->CurveUpdate(picked_point_indx, -1.0f * GetXRel() / 2.0f, GetYRel() / 2.0f, is_continuity);
+				WhenTranslate();
+			}
+			else
+			{
+				getBezier()->CurveUpdateRotation(picked_point_indx, -1.0f * GetXRel() / 2.0f, GetYRel() / 2.0f, is_continuity);
+				WhenRotate();
+			}
+		}
+	}
+}
+
+void Game::increasePickedPoint()
+{
+	int max_point = getBezier()->GetSegmentsNum() * 3;
+	picked_point_indx = min(picked_point_indx + 1, max_point);
+}
+void Game::decreasePickedPoint()
+{
+	picked_point_indx = max(picked_point_indx - 1, 0);
+}
+
+
 void Game::WhenRotate()
 {
 }
@@ -69,6 +127,7 @@ void Game::Motion()
 {
 	if(isActive)
 	{
+		bezier->MoveCube();
 	}
 }
 
